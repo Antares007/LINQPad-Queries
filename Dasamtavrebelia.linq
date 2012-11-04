@@ -1,15 +1,13 @@
 <Query Kind="Statements">
   <Connection>
-    <ID>45833638-ad3b-4b74-ad51-3184b7afbd7a</ID>
+    <ID>b80047fa-bbc6-4c50-97ff-0a369e02fa91</ID>
     <Persist>true</Persist>
-    <Driver>LinqToSql</Driver>
-    <Server>triton</Server>
-    <CustomAssemblyPath>C:\Temp\ClassLibrary3\ClassLibrary3\bin\Debug\ClassLibrary3.dll</CustomAssemblyPath>
-    <CustomTypeName>ClassLibrary3.CustomSocDazgvevaDataContext</CustomTypeName>
+    <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
+    <UserName>sa</UserName>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAIAg+Bd0cFE2ekrmjntd3ggAAAAACAAAAAAAQZgAAAAEAACAAAAAD89x4SL38S/4r7NUU2iHNNTcmnVTi1xQPx1AC1vAtFAAAAAAOgAAAAAIAACAAAABgO+xVBio0IKzceIXWbWfgFv0jcxQpOA9YilhDtPA8XxAAAABJcM5+MLInsGd5jUUGfXtnQAAAALHy7sVof5cKLhfpSHxbLdPESALwKOWLElOgeYcZmaeqO1sDG9SHnPN5xOzSlBHlSD7agk+KC9dH/4XMZn4gYvM=</Password>
     <Database>SocialuriDazgveva</Database>
-    <UserName>DarigebaDzebnisSamsaxuri</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA3XCANzX8A0+HtkxmZtXFGAAAAAACAAAAAAAQZgAAAAEAACAAAAD+ZsZvKoa4DrLJhG9tCzXWhjtCv48LvJsIivHmOBF5wwAAAAAOgAAAAAIAACAAAABPkJWWnUeORKNVmkaG+FTUF4jBjGZpCpIqmV9AsGOxcxAAAAB2Oh1GL7WTOTfA2eg2BtI0QAAAAA2d/39Fnh2p1+56KXdbJfvqo5EYPLCcvcL7ATAWmyGB+Bkr+ffceLZ4oCWkCel6YLeIMv6JmGdptoTfZ6ymTLM=</Password>
+    <ShowServer>true</ShowServer>
   </Connection>
   <Reference>C:\Temp\EPPlus.dll</Reference>
   <Namespace>OfficeOpenXml</Namespace>

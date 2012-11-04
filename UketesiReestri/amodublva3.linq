@@ -23,33 +23,31 @@ void Main()
 					.GroupBy (x => x.Unnom)
 					.ToDictionary(k => k.Key, g => g.Select (v => new Ur.Chanaceri(v.Base_Type,v.Dacesebuleba,v.FID,v.PID,v.First_Name,v.Last_Name,v.Birth_Date,v.Tarigi,v.IdentPID)));
 					
-	var ucs = UnnomisConventoris.Where (uc => uc.NewUnnom==9389286);
+	var ucs = UnnomisConventoris;//.Where (uc => uc.NewUnnom==9384672);
 	
-	var a = ucs.Select (uc => new {uc.OldUnnom, uc.NewUnnom})
-	.Concat(ucs.Select (uc => new {OldUnnom=uc.NewUnnom, NewUnnom=uc.NewUnnom*1}).Distinct())
-	.SelectMany (uc => Unnoms.Where (u => u.Unnom==uc.OldUnnom).Select (u => new {u, uc.NewUnnom} ))
-	.AsEnumerable()
-	.Select(x => new { x.u, us = snapshots[x.u.Unnom], x.NewUnnom})
-	.GroupBy (uc => uc.NewUnnom)
-	.Select (g => {
-		var unms = g.Select (x => new {
-				x.u.Unnom,
-				x.u.NewUnnom, 
-				Unnomi = new Ur.Unnom(x.u.Unnom, new Ur.Chanaceri(x.u.Base_Type,x.u.Dacesebuleba,x.u.FID,x.u.PID,x.u.First_Name,x.u.Last_Name,x.u.Birth_Date,x.u.Tarigi,x.u.IdentPID), x.us.ToList())
-				}).ToDictionary (x => x.Unnom);
-		
-		foreach(var e in unms.Where (x => x.Value.NewUnnom.HasValue).Select (x => x.Value))
-		{
-			e.Unnomi.Gaduble(unms[e.NewUnnom.Value].Unnomi);
-		}
-		return unms.First (u => !u.Value.NewUnnom.HasValue).Value.Unnomi;
-	})
-	.OrderByDescending (u => u.DublebisRaodenoba)
-	.Dump()
-	;
-
-	
-	//.Select (g => g.Select (x => x.u).OrderBy (x => x.PID).Select (x => new{x.Unnom,x.NewUnnom,x.PID}).GroupBy (x => x.PID))
-	
-	
+	var a = ucs	.Select (uc => new {uc.OldUnnom, uc.NewUnnom})
+				.Concat (ucs.Select (uc => new {OldUnnom=uc.NewUnnom, NewUnnom=uc.NewUnnom*1}).Distinct())
+				.SelectMany (uc => Unnoms.Where (u => u.Unnom==uc.OldUnnom).Select (u => new {u, uc.NewUnnom} ))
+				.AsEnumerable()
+				.Select(x => new { x.u, us = snapshots[x.u.Unnom], x.NewUnnom})
+				.GroupBy (uc => uc.NewUnnom)
+				.Select (g => {
+							var unms = g.Select (x => new {
+									x.u.Unnom,
+									NewUnnom=x.u.Amoidubla.HasValue ? x.u.Amoidubla:x.u.NewUnnom, 
+									Unnomi = new Ur.Unnom(x.u.Unnom, new Ur.Chanaceri(x.u.Base_Type,x.u.Dacesebuleba,x.u.FID,x.u.PID,x.u.First_Name,x.u.Last_Name,x.u.Birth_Date,x.u.Tarigi,x.u.IdentPID), x.us.ToList())
+									}).ToDictionary (x => x.Unnom);
+							
+							foreach(var e in unms.Where (x => x.Value.NewUnnom.HasValue ).Select (x => x.Value))
+							{
+								e.Unnomi.Gaduble(unms[e.NewUnnom.Value].Unnomi);
+							}
+							return unms.First (u => !u.Value.NewUnnom.HasValue).Value.Unnomi;
+						})
+				.Where (u => u.SaechvoDublebi().Count()>0)
+				.OrderByDescending (u => u.SaechvoDublebi().Count())
+				.SelectMany (u => u.SaechvoDublebi())
+				.ToList ().Dump();
+				;
+	//a.SelectMany (x => new []{x.Item1,x.Item2}).Select (x => x.Value).Distinct().Dump();
 }

@@ -17,12 +17,12 @@
 
 void Main()
 {
-	var periodi="2012xx";
+	var periodi="201208";
 
-	var chabarebebi = PolisisChabarebisIstorias
+	var chabarebebi = PolisisChabarebisIstorias.Where (i => !GankhorcielebuliVizitebi_165_2012xxes.Any ( gv => gv.PaketisNomeri == i.PaketisNomeri) )
 						.SelectMany(i => VGadarickhvaFull.Where(g=>g.PolisisNomeri==i.PolisisNomeri).DefaultIfEmpty().Select(g=>new {i,g}))
-						//.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
-						.Where (x => x.i.Polisebi.ProgramisId>20)
+						.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
+						.Where (x => x.i.Polisebi.ProgramisId<20)
 						.Select (x => new {	x.i.PaketisNomeri,
 											Chambarebeli = x.i.Chambarebeli == "Socagenti" || x.i.Chambarebeli == "Banki" || x.i.Chambarebeli == "Fosta" ? x.i.Chambarebeli : "AdgilidanGacema",
 											x.i.Statusi,
@@ -33,7 +33,7 @@ void Main()
 											GaformdaKontrakti = x.g != null,
 											Dadgenileba = x.i.Polisebi.ProgramisId < 20 ? 218 : 165,
 										}).ToList();
-	1.Dump();
+
 	var paketebi = (
 		from pci in chabarebebi
 		group pci by pci.PaketisNomeri into g
