@@ -46,7 +46,7 @@ void Main()
 						})
 				.Where (u => u.SaechvoDublebi().Count()>0)
 				.OrderByDescending (u => u.SaechvoDublebi().Count())
-				.SelectMany (u => u.SaechvoDublebi())
+				//.SelectMany (u => u.SaechvoDublebi())
 				.ToList ().Dump();
 				;
 	//a.SelectMany (x => new []{x.Item1,x.Item2}).Select (x => x.Value).Distinct().Dump();

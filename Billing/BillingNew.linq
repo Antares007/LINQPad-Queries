@@ -10,6 +10,8 @@
     <ShowServer>true</ShowServer>
   </Connection>
   <Reference>D:\Dev\Libs\EPPlus\EPPlus.dll</Reference>
+  <NuGetReference>Dapper</NuGetReference>
+  <Namespace>Dapper</Namespace>
   <Namespace>OfficeOpenXml</Namespace>
   <Namespace>OfficeOpenXml.Style</Namespace>
   <Namespace>System.Drawing</Namespace>
@@ -17,12 +19,39 @@
 
 void Main()
 {
-	var periodi="201208";
-
-	var chabarebebi = PolisisChabarebisIstorias.Where (i => !GankhorcielebuliVizitebi_165_2012xxes.Any ( gv => gv.PaketisNomeri == i.PaketisNomeri) )
+	this.Connection.Open();
+	var gadaxdiliPaketebi=new HashSet<string>(this.Connection.Query<string>(@"
+SELECT PaketisNomeri
+FROM   [SocialuriDazgveva].[dbo].[BillingGankhorcielebuliVizitebi]
+WHERE  FName in ( 'GankhorcielebuliVizitebi_165_2012xx',
+                  'GankhorcielebuliVizitebi_165_2012x3',
+				  'GankhorcielebuliVizitebi_165_2012x4korektirebuli',
+                  'GankhorcielebuliVizitebi_165_2012x5'
+                ) 
+AND    (    (Chambarebeli = 'Banki'    AND Chabarda          = 'Chabarda')
+         OR (Chabarda     = 'Chabarda' AND KontraktiGaformda = 'KontraktiGaformda')
+         OR (Dadgenileba  = 218        AND Chambarebeli      = 'Fosta' AND KontraktiGaformda = 'KontraktiGaformda')
+       )"));
+	var gamortmeuliPolisebi=new HashSet<string>(this.Connection.Query<string>(@"
+SELECT Polisebi
+FROM [SocialuriDazgveva].[dbo].[BillingChabarebuliPaketebi]
+WHERE FName in ( 'ChabarebuliPaketebi_165_2012xx_Yvela',
+                 'ChabarebuliPaketebi_165_2012x3_Yvela',
+				 'ChabarebuliPaketebi_165_2012x4_Yvela_korektirebuli',
+                 'ChabarebuliPaketebi_165_2012x5_Yvela'
+			   )")
+			.SelectMany (s => s.Split(',',' '))
+			.Select (s => s.Trim())
+			.Where (s => s.Length == 9)
+			.Where (s => s.All(Char.IsNumber))
+			);	   
+//return;	   
+	var periodi="2012x5test";
+	var chabarebebi = PolisisChabarebisIstorias
 						.SelectMany(i => VGadarickhvaFull.Where(g=>g.PolisisNomeri==i.PolisisNomeri).DefaultIfEmpty().Select(g=>new {i,g}))
-						.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
-						.Where (x => x.i.Polisebi.ProgramisId<20)
+						//.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
+						.Where (x => x.i.Polisebi.ProgramisId > 20)
+						.Where (x => x.i.VizitisTarigi.Date < x.i.Polisebi.ChabarebisBoloVada.Date  )
 						.Select (x => new {	x.i.PaketisNomeri,
 											Chambarebeli = x.i.Chambarebeli == "Socagenti" || x.i.Chambarebeli == "Banki" || x.i.Chambarebeli == "Fosta" ? x.i.Chambarebeli : "AdgilidanGacema",
 											x.i.Statusi,
@@ -33,9 +62,10 @@ void Main()
 											GaformdaKontrakti = x.g != null,
 											Dadgenileba = x.i.Polisebi.ProgramisId < 20 ? 218 : 165,
 										}).ToList();
-
 	var paketebi = (
 		from pci in chabarebebi
+		where !gadaxdiliPaketebi.Contains(pci.PaketisNomeri)
+//		where !gamortmeuliPolisebi.Contains(pci.PolisisNomeri)
 		group pci by pci.PaketisNomeri into g
 		let fp=g.First ()
 		let polisebi=g.Select (x => new Polisi_(x.PolisisNomeri,x.MzgveveliKompaniisKodi,x.Statusi, x.PolisisStatusi, x.GaformdaKontrakti, x.Dadgenileba))
@@ -61,10 +91,7 @@ var amodubluliPaketebi=paketebi
 							x.Chabarda!=null?x.Chabarda.Paketi:
 								x.First.Paketi).ToList();
 amodubluliPaketebi.Where (p => p.KontraktiGaformda).GroupBy (p => p.Dadgenileba).Select (g => new {g.Key,Raod=g.Count()}).Dump();
-//
-//amodubluliPaketebi.Where (p => p.KontraktiGaformda).Where (p => p.DakhlicheMzgveveliKompaniebisMikhedvit().Count ()>1).Dump();
-//return;
-	
+
 var q = amodubluliPaketebi.Select(x => new { 
 											x.PaketisNomeri,
 											Chabarda=x.Chabarda ? "Chabarda" : "VerChabarda",
@@ -75,7 +102,9 @@ var q = amodubluliPaketebi.Select(x => new {
 											x.Dadgenileba,
 											x.VizitisTarigi,
 								});
-var misacemi = q.Select (x => new {         x.PaketisNomeri,
+var misacemi = q
+				
+				.Select (x => new {         x.PaketisNomeri,
 											x.Chabarda,
 											x.KontraktiGaformda,
 											x.Chambarebeli,
@@ -85,11 +114,12 @@ var misacemi = q.Select (x => new {         x.PaketisNomeri,
 											x.VizitisTarigi,
 								})
 								.ToList();
-								
+
 var gamosartmeviPaketebi=amodubluliPaketebi
 		.SelectMany (p => p.DakhlicheMzgveveliKompaniebisMikhedvit()
 								.Where (x => x.KontraktiGaformda && x.Chabarda)
 					)
+		
 		.Select (x => new {
 					MzgveveliKompaniisKodi=x.MzgveveliKompaniebi.First (),
 					Periodi=x.Periodi,
@@ -105,9 +135,9 @@ var gamosartmeviPaketebi=amodubluliPaketebi
 	{
 		
 		Ext.ToExcel(misacemi.Where (m => m.Dadgenileba == dad), "GankhorcielebuliVizitebi_" + dad.ToString() + "_" + periodi);
-		Ext.ToExcel(gamosartmeviPaketebi.Where (m => m.Dadgenileba == dad), "ChabarebuliPaketebi_" + dad.ToString() + "_"  + periodi + "_Yvela");
-		foreach(var g in gamosartmeviPaketebi.Where (m => m.Dadgenileba == dad).GroupBy (g => g.MzgveveliKompaniisKodi))
-			Ext.ToExcel(g, "ChabarebuliPaketebi_" + dad.ToString() + "_" + periodi + "_" + g.Key);
+//		Ext.ToExcel(gamosartmeviPaketebi      .Where (m => m.Dadgenileba == dad), "ChabarebuliPaketebi_" + dad.ToString() + "_"  + periodi + "_Yvela");
+//		foreach(var g in gamosartmeviPaketebi .Where (m => m.Dadgenileba == dad) .GroupBy (g => g.MzgveveliKompaniisKodi))
+//			Ext.ToExcel(g, "ChabarebuliPaketebi_" + dad.ToString() + "_" + periodi + "_" + g.Key);
 	}
 }
 

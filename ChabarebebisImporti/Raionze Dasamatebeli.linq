@@ -13,20 +13,23 @@
 
 //Polisebis
 //	.Where (p => p.PolisisStatusi == null)
-////	.Where (p => p.MovlenaChabarebebi == null)
-////	.Where (p => !GadaecaFostas.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
+//	.Where (p => !GadaecaFostas.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
+//	.Where (p => !BankzeGadasacemiPaketisPolisebi_alls.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
+//	.Where (p => !GadaecaRaions.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
 //	.GroupBy(p => new{p.ShekmnisTarigi,p.ChabarebisBoloVada, Dadgenileba = p.ProgramisId < 20 ? 218 : 165 })
 //	.Select (g => new {g.Key.ShekmnisTarigi, g.Key.ChabarebisBoloVada, g.Key.Dadgenileba, Raod=g.Count ()})
 //	.OrderByDescending (x => x.ShekmnisTarigi)
 //	.Dump();
+//return;
+var dt="2012-12-11";
+var id=83755;
 
-var dt="2012-10-16";
-var id=83746;
 
 var pols = Polisebis
-//			.Where (p => p.PolisisNomeri=="038018659")
-			.Where (p => p.ProgramisId < 20)
-			.Where (p => p.ShekmnisTarigi > DateTime.Parse(dt))
+            .Where (p => p.PolisisNomeri == "039265722")
+//			.Where (p => p.ProgramisId < 20)
+//			.Where (p => p.ShekmnisTarigi > DateTime.Parse("2012-11-01"))
+//			.Where (p => p.ChabarebisBoloVada > DateTime.Parse("2012-12-31"))
 			.Where (p => p.PolisisStatusi == null)
 			.Where (p => p.DasarigebeliPolisebi == null)
 			.AsEnumerable()
@@ -34,7 +37,7 @@ var pols = Polisebis
 			.ToList();
 				
 pols.Count ().Dump();
-return;
+//return;
 
 DasarigebeliPolisebis.InsertAllOnSubmit(pols);
 SubmitChanges();
