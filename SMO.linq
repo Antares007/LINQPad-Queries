@@ -22,9 +22,24 @@
   <Namespace>System.Data.Common</Namespace>
 </Query>
 
+class PirvelckarosCkhrilebi
+{
+    Microsoft.SqlServer.Management.Smo.Server _server;
+    static string[] _cxrilebisSakhelebi = new []{"Pirvelckaro_01_UMCEOEBI","Pirvelckaro_02_DEVNILEBI","Pirvelckaro_03_BAVSHVEBI","Pirvelckaro_04_REINTEGRACIA","Pirvelckaro_05_KULTURA","Pirvelckaro_06_XANDAZMULEBI","Pirvelckaro_07_SKOLA_PANSIONEBI","Pirvelckaro_08_TEACHERS","Pirvelckaro_09_UFROSI_AGMZRDELEBI","Pirvelckaro_10_APKHAZETIS_OJAKHEBI","Pirvelckaro_11_SATEMO","Pirvelckaro_12_MCIRE_SAOJAXO","Pirvelckaro_13_TEACHERS_AFX","Pirvelckaro_14_RESURSCENTRIS_TANAMSHROMLEBI","Pirvelckaro_21_SAPENSIO_ASAKIS_MOSAXLEOBA","Pirvelckaro_22_STUDENTEBI","Pirvelckaro_23_BAVSHVEBI(165)","Pirvelckaro_24_INVALIDI_BAVSHVEBI","Pirvelckaro_25_MKVETRAD_GAMOXATULI_INVALIDI_BAVSHVEBI","Pirvelckaro_26_ARASAQARTVELOS_MOQALAQE_PENSIONREBI","Pirvelckaro_27_AXALSHOBILEBI(165)","Pirvelckaro_100_DevniltaMisamartebi_201210"};
+    public PirvelckarosCkhrilebi(Microsoft.SqlServer.Management.Smo.Server server)
+    {
+        _server = server;
+    }
+    public IEnumerable<Table> MomeKvela()
+    {
+        foreach (var ckhilisSakheli in _cxrilebisSakhelebi)
+        {
+            yield return Ex.Triton.Databases["Pirvelckaroebi"].Tables[ckhilisSakheli];
+        }
+    }
+}
 void Main()
 {
-
 Func<string,bool,string> gaakhvie = (s,isUnicode) =>
 @"ltrim(rtrim(replace(replace(replace(replace(replace(replace(replace(replace(replace("+(isUnicode?"Pirvelckaroebi.dbo.fn_con2utf8([" + s + @"])":"[" + s + @"]")+",nchar(10),' '),nchar(13),' '),nchar(9),' '),'   ',' '),'   ',' '),'   ',' '),'  ',' '),'  ',' '),'  ',' ')))";
 
@@ -49,6 +64,18 @@ foreach (var x in xs)
 }
 
 return;
+
+
+var svr = Ex.Triton;
+this.Connection.Open();
+Func<string,object> evalSqlExpression = exp => this.Connection.Query("select "+exp+" as ex").Cast<IDictionary<string,object>>().First ().Values.First ();
+
+var pc = new PirvelckarosCkhrilebi(svr);
+
+pc.MomeKvela().Select (p => string.Format("update sd set sd.Unnom=p.Unnom from {0} p join Source_Data sd on sd.Id=p.SourceDataId where sd.Unnom is null",p.Name)).Dump();
+
+return;
+
 
 
 1.Dump();
@@ -82,7 +109,6 @@ foreach (var t in from  t in pirvelckarosCkhrilebi where !t.Columns.Contains("Ga
 	t.AddColumun(c => { c.Name="Gakrechilia"; c.DataType=DataType.Bit; });
 	t.Alter();
 }
-
 foreach (var t in from  t in pirvelckarosCkhrilebi
 				  where !t.Indexes().Where (i => i.IndexedColumns.Count == 1).Any(i => i.IndexedColumns.Contains("Gakrechilia"))
 		          select t)
@@ -192,6 +218,10 @@ public static class Ex
 	public static IEnumerable<Table> Tables(this Database src) 
 	{
 		return src.Tables.Cast<Table>();
+	}	
+	public static IEnumerable<View> Views(this Database src) 
+	{
+		return src.Views.Cast<View>();
 	}	
 
 	public static IEnumerable<Column> Columns(this Table src) 

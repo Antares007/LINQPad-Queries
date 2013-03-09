@@ -31,13 +31,14 @@ void Main()
 //	svr.KillDatabase("ForDeleteJUST20121210");
 //	svr.Databases["ForDeleteJUST20121210"].Drop();
 //
-//	return;
+//	return;SSA_130201.BAK
 
 	Restore rs = new Restore
     {
 		NoRecovery = false,
-		Database = "ForDeleteInsurence_SUBS20130101",
-		Devices = { new BackupDeviceItem(@"J:\ShareForBakRestore\Insurence_SUBS_130101.BAK", DeviceType.File) },
+		
+        Database = "ForDeleteSSA_130306",
+		Devices = { new BackupDeviceItem(@"J:\ShareForBakRestore\SSA_130306.bak", DeviceType.File) },
 		Action = RestoreActionType.Database,
 		ReplaceDatabase = true,
 		PercentCompleteNotification = 10,
@@ -49,7 +50,7 @@ void Main()
 				                     PhysicalName=Path.GetFileName(r["PhysicalName"].ToString())
 									});
 	foreach(var file in files)
-		rs.RelocateFiles.Add(new RelocateFile(file.LogicalName, @"J:\ShareForBakRestore\SMOSSA"+file.LogicalName));
+		rs.RelocateFiles.Add(new RelocateFile(file.LogicalName, @"J:\ShareForBakRestore\SSA_130306"+file.LogicalName));
 	
 	rs.SqlRestore(svr);
 	Console.WriteLine("Full Database Restore complete.");

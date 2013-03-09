@@ -54,90 +54,22 @@ var ckhrilebi=(
 	let v=r.First ().Groups[1].Value
 	select new {BaseType = int.Parse(v), ckhrili=new UnnomCkhrili(k.Key,GetFieldsNames(this.Connection,k.Key),k.Value)}
 ) .Select (n => new {n.BaseType,Ckhrili=n.ckhrili})
-//.Where (n => n.Ckhrili.BaseTypes(s=>this.Connection.Query(s)).Any (s => s.ArisAraidentificirebuli))
-  .Where (n => n.BaseType == 27)
- ;
-
+  .Where (n => n.BaseType < 100);
 foreach(var ckhrili in ckhrilebi.Select (c => c.Ckhrili)){
         ckhrili.Dump();
-//        RunInTransaction(con => con.Execute("update " + ckhrili.Sakheli + " set Unnom = null", commandTimeout:9999));
         RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
         RunInTransaction(con => {
             MianicheUnnomebi(con, ckhrili);
         });
         RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
-//        RunInTransaction(con => {
-//            con.Execute(@"EXEC DazgvevaGanckhadebebi.dbo.test '20121201', 
-//                        'select * from DazgvevaGanckhadebebi.[dbo].[vPirvelckaro_23_BAVSHVEBI(165)] WHERE Unnom is not null'",commandTimeout:9999);
-//        });
     }
-//var maxUnnom=this.Connection.Query("select max(Unnom) from UketesiReestri..Unnoms").Dump();
-    	
-return;
-    this.Connection.Query("select * from UketesiReestri..UnnomShesadarebeliReestri where Unnom>9439045 ")
-        .Select (c => new 
-            {
-                Unnom      =(int)c.Unnom,
-                IdentPID   =(string)c.IdentPID,
-                PID        =(string)c.PID,
-                First_Name =(string)c.First_Name,
-                Last_Name  =(string)c.Last_Name,
-                Birth_Date =(DateTime?)c.Birth_Date,
-                
-                Lev="Lev".OnClick(()=>{
-                    this.Connection.Query("select * from ("+
-                                          "select Base_Type,Dacesebuleba,Unnom,IdentPID,PID,First_Name,Last_Name,Birth_Date from UketesiReestri..UnnomShesadarebeliReestri where Base_Type in (3, 4, 6, 7, 11, 12)  "+
-                                          "Union all "+
-                                          "select Base_Type,Dacesebuleba,Unnom,IdentPID,PID,Last_Name,First_Name,Birth_Date from UketesiReestri..UnnomShesadarebeliReestri where Base_Type in (3, 4, 6, 7, 11, 12) "+ 
-                                          ") a where a.Unnom != "+((int)c.Unnom).ToString())
-                         .Select ((g,i) => new 
-                                    {
-                                        i,
-                                        
-                                        Unnom      =(int)c.Unnom,
-                                        Base_Type      =(int)c.Base_Type,
-                                        Dacesebuleba =(string)c.Dacesebuleba,
-                                        IdentPID   =(string)c.IdentPID,
-                                        PID        =(string)c.PID,
-                                        First_Name =(string)c.First_Name,
-                                        Last_Name  =(string)c.Last_Name,
-                                        Birth_Date =(DateTime?)c.Birth_Date,
-
-                                        _Unnom      =(int)g.Unnom,
-                                        _Base_Type      =(int)g.Base_Type,
-                                        _Dacesebuleba =(string)g.Dacesebuleba,
-                                        _IdentPID   =(string)g.IdentPID,
-                                        _PID        =(string)g.PID,
-                                        _First_Name =(string)g.First_Name,
-                                        _Last_Name  =(string)g.Last_Name,
-                                        _Birth_Date =(DateTime?)g.Birth_Date,
-                                        Gadublva="".OnClick((b)=>{b.IsEnabled=false;Gaduble(Math.Max((int)c.Unnom, (int)g.Unnom), Math.Min((int)c.Unnom, (int)g.Unnom)); }),
-                                        LPID        =(int)Ex2.LevenshteinDistance(g.PID,c.PID),
-                                        LFirst_Name =(int)Ex2.LevenshteinDistance(g.First_Name, c.First_Name),
-                                        LLast_Name  =(int)Ex2.LevenshteinDistance(g.Last_Name,c.Last_Name),
-                                        LBirth_Date =(int)Ex2.LevenshteinDistance(((DateTime?)g.Birth_Date).HasValue?((DateTime)g.Birth_Date).ToString("yyyy-MM-dd"):"", ((DateTime?)c.Birth_Date).HasValue?((DateTime)c.Birth_Date).ToString("yyyy-MM-dd"):""),
-                                        })
-                                            .OrderBy (g => g.LFirst_Name)
-                                            .OrderBy (g => g.LLast_Name)
-                                            .OrderBy (g => g.LBirth_Date)
-                                            .OrderBy (g => g.LPID)
-                                            .OrderBy (x =>x.LFirst_Name+x.LLast_Name).Show();
-                })
-            }).Show();
-//            
-//    RunInTransaction(con => {
-//        DaadgineUnnomebi(con, ckhrili);
-//    });
-
-
-return;
 }
 Tuple<int,int> DaadgineUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
 {
     var reestrisCkhrili="UketesiReestri..UnnomShesadarebeliReestri";
-	var shemdarebeli = new ShedarebisSkriptisGeneratori(new UnnomCkhrili(reestrisCkhrili, GetFieldsNames(con, reestrisCkhrili), null));
+	var shemdarebeli = new ShedarebisSkriptisGeneratori(new ReestrisCkhrili());
     
-    var pirobebi = ckhrili.BaseTypes(s => con.Query(s))
+    var pirobebi = ckhrili.BaseTypes(s => con.Query<int>(s))
         .SelectMany (bt => bt.ShedarebisPirobebi.Select (x => new {Piroba=x,Bt=bt}) )
         .GroupBy (x => x.Piroba)
         .Select (g => g.Key.DaamateBazisTipebisShezgudva(g.Select (x => x.Bt).ToList()));
@@ -146,7 +78,7 @@ Tuple<int,int> DaadgineUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
     var minicUnnomebi=0;
 	foreach( var skripti in updateSkriptebi )
 	{
-		skripti.Sql.Dump();
+        //skripti.Sql.Dump();
 		minicUnnomebi += con.Execute(skripti.Sql, commandTimeout:9999);
 	}
     return Tuple.Create(minicUnnomebi,con.Query<int>("select count(*) from " + ckhrili.Sakheli + " where Unnom is null").First ());
@@ -158,7 +90,7 @@ void Gaduble(int u1,int u2)
 void MianicheUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
 {
     var minichebuliUnnomebi = 0;
-    foreach(var bt in ckhrili.BaseTypes(s=>con.Query(s)))
+    foreach(var bt in ckhrili.BaseTypes(s=>con.Query<int>(s)))
     {
         var velebi = bt.VelebiUnnomisMisanicheblad;
         if(velebi == null) continue;
@@ -204,7 +136,8 @@ WHERE u1.Unnom!=u2.Unnom"
         };
         foreach (var gp in gadublvisPirobebi)
         {
-            while(con.Execute("exec UketesiReestri.[dbo].[spGadublva] '"+gp+"'",commandTimeout:9999).Dump(gp)>0);
+            var tsql = "exec UketesiReestri.[dbo].[spGadublva] '"+gp+"'";
+            while(con.Execute(tsql,commandTimeout:9999).Dump(tsql)>0);
         }  
     }
 }

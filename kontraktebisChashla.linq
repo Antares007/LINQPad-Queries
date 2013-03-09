@@ -70,35 +70,6 @@
   <Namespace>System.Windows.Markup</Namespace>
 </Query>
 
-internal class TestEvent : IEvent
-    {
-        public Guid EventId { get; private set; }
-        public string Type { get; private set; }
-
-        public bool IsJson { get; private set; }
-
-        public byte[] Data { get; private set; }
-        public byte[] Metadata { get; private set; }
-
-        public TestEvent(string data = null, string metadata = null)
-        {
-            EventId = Guid.NewGuid();
-            Type = GetType().FullName;
-
-            IsJson = true;
-            Data = Encoding.UTF8.GetBytes(data ?? EventId.ToString());
-            Metadata = Encoding.UTF8.GetBytes(metadata ?? "metadata");
-        }
-
-        public override string ToString()
-        {
-            return string.Format("EventId: {0}, Type: {1}, Data: {2}, Metadata: {3}",
-                                 EventId,
-                                 Type,
-                                 Encoding.UTF8.GetString(Data ?? new byte[0]),
-                                 Encoding.UTF8.GetString(Metadata ?? new byte[0]));
-        }
-    }
 
 async Task a(Action< List<IDictionary<string,object>>> nexts)
 {
@@ -122,79 +93,6 @@ async Task a(Action< List<IDictionary<string,object>>> nexts)
         if(buf.Count > 0){
             nexts(buf);
         }
-    }
-}
-public static class EvemtStoreEx
-{
-
-    public static IEnumerable<T>  ReadAllEventsBackward<T>(string streamName, T sample) 
-    {
-        
-        using (var store = EventStoreConnection.Create())
-        {
-            store.Connect(new IPEndPoint(Dns.GetHostAddresses("172.17.112.230")[0], 1113));
-            var skip=1;
-            while (true)
-            {
-                var rec = store.ReadEventStreamForward(streamName, skip, 10240);
-                skip+=10240;
-                if(rec.Events.Length==0)
-                    yield break;
-                foreach(var e in rec.Events)
-                {
-                    var jstr=Encoding.UTF8.GetString(e.Data);
-                    yield return Newtonsoft.Json.JsonConvert.DeserializeAnonymousType(jstr,default(T));
-                }
-               rec.Events.Count().Dump();
-                
-                
-            }
-        }
-        yield break;
-    }
-    public static void AppendToStream<T>(this IEnumerable<T> src, string streamName)
-    {
-
-        using (var store = EventStoreConnection.Create())
-        {
-            store.Connect(new IPEndPoint(Dns.GetHostAddresses("172.17.112.230")[0], 1113));
-            foreach(var b in src.Buffer(2048))
-                store.AppendToStream(streamName
-                        , ExpectedVersion.Any
-                        , b.Select(x=>new TestEvent(Newtonsoft.Json.JsonConvert.SerializeObject(x)))
-                        );
-        }
-
-    }
-
-    
-    
-    public static IEnumerable<EventStore.ClientAPI.RecordedEvent>  ReadAllEvents(string streamName) 
-    {
-       using (var store = EventStoreConnection.Create())
-        {
-            store.Connect(new IPEndPoint(Dns.GetHostAddresses("172.17.112.230")[0], 1113));
-            var start = 0;
-            while (true)
-            {
-                var rec = store.ReadEventStreamForward(streamName, start, 40);
-                start = rec.NextEventNumber;
-                if(rec.Count > 0)
-                   foreach(var e in rec.Events)
-                       yield return e;
-                if(rec.IsEndOfStream) 
-                  yield break;
-            }
-        }
-    }
-    public static void Store(Action<EventStore.ClientAPI.EventStoreConnection> actOn)
-    {
-        using (var store = EventStoreConnection.Create())
-        {
-            store.Connect(new IPEndPoint(Dns.GetHostAddresses("172.17.112.230")[0], 1113));
-            actOn(store);
-        }
-         
     }
 }
 public static class JSON
@@ -223,6 +121,38 @@ public static class JSON
 void Main()
 {
 
+var dazgvevisCkhrilebi =    from t in Ex.Triton.Databases["INSURANCEW"].Tables()
+                            let split = t.Name.ToLower().Split('_')
+                            where split.Length == 2
+                            let pir = split[0]
+                            let meore = split[1]
+                            where pir.ToLower().Contains("dazgveva") && meore.All(Char.IsNumber)
+                            let perInt = int.Parse(meore)
+                            where perInt>201107
+                            select new {t, periodi = (perInt < 2000) ? 201000 + perInt : perInt};
+                            
+                            
+var selectebi=dazgvevisCkhrilebi
+    .OrderBy (c => c.t.Name)
+    .Select (c => string.Format(@"select
+     {1} Periodi
+    ,d.ID,d.AkhaliUnnomi, d.Unnom, d.Base_type
+    ,d.[dagv-tar], d.End_Date
+    ,d.ADD_DATE, d.ADD_DATE_{1}_TMP ADD_DATE_Shemdegi
+    ,d.CONTINUE_DATE, d.CONTINUE_DATE_{1}_TMP CONTINUE_DATE_Shemdegi
+    ,d.STOP_DATE, d.STOP_DATE_{1}_TMP STOP_DATE_Shemdegi
+    ,d.STATE, d.STATE_{1} STATE_Shemdegi
+    ,d.Company_ID, d.Company_ID_{1} Company_ID_Shemdegi
+from INSURANCEW..{0} d",c.t.Name,c.periodi))
+;
+string.Join("\nUnion all\n",selectebi).Dump();
+return;
+
+EtlEx.Process(
+    Enumerable.Range(1,10).Select (e => new {e}).EtlInput()//EtlEx.DumpToSql("Tname")
+).Dump();
+
+return;
 var reestrisCkhrilebi = from db in Ex.Triton.Databases()
                         from t in db.Tables()
                         let split = t.Name.ToLower().Split('_')
@@ -239,119 +169,17 @@ var apends = reestrisCkhrilebi
     ;
 string.Join("\n",apends).Dump();
 return;
-//EvemtStoreEx.Store(s => {
-//   
-//});
-EvemtStoreEx
-    .ReadAllEvents("JUST-JUST_20121211")
-    .Take   (1)
-    .Select (x => new {Meta=((JObject)x.Metadata.Parse<dynamic>().Schema).Properties().Select (prop=>prop.Name)})
-    .Dump   ();
-
-return;
-Func<EventStore.ClientAPI.RecordedEvent,dynamic> ShowStream=null;
-ShowStream = e => {
-    return new {
-            EventStreamId=e.EventStreamId.OnClick(()=>{
-                EvemtStoreEx.ReadAllEvents(e.EventStreamId).Take(100)
-                    .OrderBy (x => x.EventStreamId)
-                    .Select(x=> ShowStream(x))
-                    .Show(e.EventStreamId);
-                }),
-            EventId=e.EventId,
-            EventNumber=e.EventNumber,
-            EventType=e.EventType,
-            Data=Encoding.UTF8.GetString(e.Data),
-            Metadata=Encoding.UTF8.GetString(e.Metadata),
-           };
-};
-EvemtStoreEx.ReadAllEvents("$streams")
-    .Take(100)
-    .OrderBy (x => x.EventStreamId)
-    .Select(x=> ShowStream(x))
-    .Show("$streams");
-
-
-
-
-
-
-
-
-
 
 
 
 
 return;
-var dazgvevisCkhrilebi =    from t in Ex.Triton.Databases["INSURANCEW"].Tables()
-                            let split = t.Name.ToLower().Split('_')
-                            where split.Length == 2
-                            let pir = split[0]
-                            let meore = split[1]
-                            where pir.ToLower().Contains("dazgveva") && meore.All(Char.IsNumber)
-                            let perInt = int.Parse(meore)
-                            where perInt>201107
-                            select new {t, periodi = (perInt < 2000) ? 201000 + perInt : perInt};
-                            
-                            
-var selectebi=dazgvevisCkhrilebi
-    .OrderBy (c => c.t.Name)
-    .Select (c => string.Format(@"select
-     {1} Periodi
-    ,d.AkhaliUnnomi, d.Unnom, d.Base_type, d.RECORD_ADD_DATE
-    ,d.[dagv-tar], d.End_Date
-    ,d.ADD_DATE, d.ADD_DATE_{1}_TMP ADD_DATE_Shemdegi
-    ,d.CONTINUE_DATE, d.CONTINUE_DATE_{1}_TMP CONTINUE_DATE_Shemdegi
-    ,d.STOP_DATE, d.STOP_DATE_{1}_TMP STOP_DATE_Shemdegi
-    ,d.STATE, d.STATE_{1} STATE_Shemdegi
-from INSURANCEW..{0} d",c.t.Name,c.periodi))
-;
-string.Join("\nUnion all\n",selectebi);
-return;
+
     
 
 return;
-var con=this.Connection;
-con.Open();
-Action<string> mianiche = s =>{
-    var map = new Dictionary<string,string>{ {"Base_Type",  "Base_type"}
-                                            ,{"Unnom",      "AkhaliUnnomi"}
-                                            ,{"First_Name", "FIRST_NAME collate SQL_Latin1_General_CP1_CI_AS"}
-                                            ,{"Last_Name",  "LAST_NAME collate SQL_Latin1_General_CP1_CI_AS"}
-                                            ,{"Birth_Date", "BIRTH_DATE"}
-                                            ,{"PID", "PID collate SQL_Latin1_General_CP1_CI_AS"}
-                                            };
-    
-    var reestrisCkhrili="UketesiReestri..UnnomShesadarebeliReestri";
-    var shemdarebeli = new ShedarebisSkriptisGeneratori(new UnnomCkhrili(reestrisCkhrili, GetFieldsNames(this.Connection, reestrisCkhrili), null));
-    
-    var ckhrili = new Ganckhadebebi.Domain.UnnomCkhrili(s, GetFieldsNames(this.Connection, s), map);
-    
-    var pirobebi = ckhrili.BaseTypes( x => con.Query(x))
-            .SelectMany (bt => bt.ShedarebisPirobebi.Select (x => new {Piroba=x,Bt=bt}) )
-            .GroupBy (x => x.Piroba)
-            .Select (g => g.Key.DaamateBazisTipebisShezgudva(g.Select (x => x.Bt).ToList()));
-            
-    
-    foreach (var sql in shemdarebeli.Damigenerire(ckhrili, pirobebi).Select (x => x.Sql))
-    {
-        RunInTransaction(c => {
-                c.Execute(sql,commandTimeout:99999).Dump();
-        });
-    }
-};
 
 return;
-
-    foreach (var x in dazgvevisCkhrilebi.Where (x => x.periodi>201107))
-    {
-        x.t.Name.Dump();
-        mianiche(x.t.Parent.Name + ".." + x.t.Name);
-    }
-
-
-
 
     foreach (var t in dazgvevisCkhrilebi.Where (x => x.t.Columns().All (cn => cn.Name != "AkhaliUnnomi")))
     {
@@ -459,7 +287,6 @@ public static class EtlEx
         {
             _maps = maps;
         }
-        
         protected override void PrepareSchema()
         {
             foreach (var m in _maps)
