@@ -1,11 +1,11 @@
 <Query Kind="Statements">
   <Connection>
-    <ID>b80047fa-bbc6-4c50-97ff-0a369e02fa91</ID>
+    <ID>393fc2a1-3d2f-4fc3-8b9d-c916c0bb1c52</ID>
     <Persist>true</Persist>
     <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAIAg+Bd0cFE2ekrmjntd3ggAAAAACAAAAAAAQZgAAAAEAACAAAAAD89x4SL38S/4r7NUU2iHNNTcmnVTi1xQPx1AC1vAtFAAAAAAOgAAAAAIAACAAAABgO+xVBio0IKzceIXWbWfgFv0jcxQpOA9YilhDtPA8XxAAAABJcM5+MLInsGd5jUUGfXtnQAAAALHy7sVof5cKLhfpSHxbLdPESALwKOWLElOgeYcZmaeqO1sDG9SHnPN5xOzSlBHlSD7agk+KC9dH/4XMZn4gYvM=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAN27c6lA2WkeiuPoKsF6zVAAAAAACAAAAAAAQZgAAAAEAACAAAACbLLAsNsDt7paFHc5L9mKrBtKrPuHB+O2Pe8qohNTpzwAAAAAOgAAAAAIAACAAAAARwiWVIvi4yqvM5LGOqZqOnRK7TKpCRjPXZ7PkGNEFvxAAAAA0DMltrt8SinSUpeRajEf6QAAAACzIm5Lx/1cDUpvEPcBjgOVVcG4y9njzOG5jRo3BFxCqffNXq8PX7vXvt6t2LlSsl7mTqha7tgg+9E46F4mXHMQ=</Password>
     <Database>SocialuriDazgveva</Database>
     <ShowServer>true</ShowServer>
   </Connection>
@@ -15,21 +15,19 @@ Polisebis
 	.Where (p => p.PolisisStatusi == null)
 //	.Where (p => !GadaecaFostas.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
 //	.Where (p => !BankzeGadasacemiPaketisPolisebi_alls.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
-	.Where (p => !GadaecaRaions.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
+//	.Where (p => !GadaecaRaions.Any( gf => gf.PolisisNomeri==p.PolisisNomeri))
 	.GroupBy(p => new{p.ShekmnisTarigi,p.ChabarebisBoloVada, Dadgenileba = p.ProgramisId < 20 ? 218 : 165 })
 	.Select (g => new {g.Key.ShekmnisTarigi, g.Key.ChabarebisBoloVada, g.Key.Dadgenileba, Raod=g.Count ()})
 	.OrderByDescending (x => x.ShekmnisTarigi)
-	.Dump();
+	//.Dump()
+	;
 //return;
-var dt="2013-02-02";
-var id=84004;
+var dt = "2013-03-01";
+var id = 90041;
 
 var pols = Polisebis
-//          .Where (p => p.Fid == "060418603998")
-            .Where (p => p.PiradiNomeri == "01011009795")
 			.Where (p => p.ProgramisId < 20)
-			.Where (p => p.ShekmnisTarigi >= DateTime.Parse(dt))
-//			.Where (p => p.ChabarebisBoloVada > DateTime.Parse("2012-12-31"))
+			.Where (p => p.ChabarebisBoloVada >= DateTime.Parse("2013-12-01"))
 			.Where (p => p.PolisisStatusi == null)
 			.Where (p => p.DasarigebeliPolisebi == null)
 			.AsEnumerable()
@@ -37,7 +35,6 @@ var pols = Polisebis
 			.ToList();
 				
 pols.Count ().Dump();
-//return;
 
 DasarigebeliPolisebis.InsertAllOnSubmit(pols);
 SubmitChanges();

@@ -1,20 +1,20 @@
 <Query Kind="Program">
   <Connection>
-    <ID>b80047fa-bbc6-4c50-97ff-0a369e02fa91</ID>
-    <Persist>true</Persist>
+    <ID>ced05258-b3f5-4292-8b8d-577da55d0081</ID>
     <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAIAg+Bd0cFE2ekrmjntd3ggAAAAACAAAAAAAQZgAAAAEAACAAAAAD89x4SL38S/4r7NUU2iHNNTcmnVTi1xQPx1AC1vAtFAAAAAAOgAAAAAIAACAAAABgO+xVBio0IKzceIXWbWfgFv0jcxQpOA9YilhDtPA8XxAAAABJcM5+MLInsGd5jUUGfXtnQAAAALHy7sVof5cKLhfpSHxbLdPESALwKOWLElOgeYcZmaeqO1sDG9SHnPN5xOzSlBHlSD7agk+KC9dH/4XMZn4gYvM=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAN27c6lA2WkeiuPoKsF6zVAAAAAACAAAAAAAQZgAAAAEAACAAAAAe6fEoA74iMkrfJZa6XuxfzQh6cY+5cD/VGmkvkAFZHgAAAAAOgAAAAAIAACAAAAAvSa58+4v5Ek9QdqmoHFRtbjSsRtGtZOiiFFwZuP9l4hAAAADSD159L0suWS7o5rny5Q3sQAAAAFcvMLTxKkyAI0tWzIRYIyYLH7PYk2LvzCPR+00AaEffUskcT8F2IaOy6O9Btu50kIHx2PxD4ahCWKTfrpSexFY=</Password>
     <Database>Pirvelckaroebi</Database>
     <ShowServer>true</ShowServer>
+    <Persist>true</Persist>
   </Connection>
   <Reference>D:\Dev\Ganckhadebebi.Domain\Ganckhadebebi.Domain\bin\Debug\Ganckhadebebi.Domain.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Smo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\WPF\PresentationFramework.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\wpf\PresentationCore.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\System.Xaml.dll</Reference>
@@ -44,27 +44,30 @@
 void Main()
 {
 
-this.Connection.Open();
-var momeChrili=getCkhrilebisSacavi(this.Connection);
-var regEx=new Regex(@"Pirvelckaroebi\..+_([0-9]+)_.+");
-var ckhrilebi=(
-	from k in mapDict
-	let r = regEx.Matches(k.Key).Cast<Match>()
-	where r.Count ( )==1
-	let v=r.First ().Groups[1].Value
-	select new {BaseType = int.Parse(v), ckhrili=new UnnomCkhrili(k.Key,GetFieldsNames(this.Connection,k.Key),k.Value)}
-) .Select (n => new {n.BaseType,Ckhrili=n.ckhrili})
-  .Where (n => n.BaseType < 100);
-foreach(var ckhrili in ckhrilebi.Select (c => c.Ckhrili)){
-        ckhrili.Dump();
-        RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
-        RunInTransaction(con => {
-            MianicheUnnomebi(con, ckhrili);
-        });
-        RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
-    }
+	this.Connection.Open();
+	var momeChrili=getCkhrilebisSacavi(this.Connection);
+	var regEx=new Regex(@"Pirvelckaroebi\..+_([0-9]+)_.+");
+	var ckhrilebi=(
+		from k in mapDict
+		let r = regEx.Matches(k.Key).Cast<Match>()
+		where r.Count ( )==1
+		let v=r.First ().Groups[1].Value
+		select new {BaseType = int.Parse(v), ckhrili=new UnnomCkhrili(k.Key,GetFieldsNames(this.Connection,k.Key),k.Value)}
+	) .Select (n => new {n.BaseType,Ckhrili=n.ckhrili})
+	.Where (n => n.BaseType == 12);
+	foreach(var ckhrili in ckhrilebi.Select (c => c.Ckhrili))
+	{
+			ckhrili.Dump();
+			RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
+			
+			RunInTransaction(con => {
+				MianicheUnnomebi(con, ckhrili);
+			});
+			
+			RunInTransaction(con => { DaadgineUnnomebi(con, ckhrili).Dump(); });
+	}
 }
-Tuple<int,int> DaadgineUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
+Tuple<int,int> DaadgineUnnomebi(Tuple<SqlConnection,  SqlTransaction> con, UnnomCkhrili ckhrili)
 {
     var reestrisCkhrili="UketesiReestri..UnnomShesadarebeliReestri";
 	var shemdarebeli = new ShedarebisSkriptisGeneratori(new ReestrisCkhrili());
@@ -81,13 +84,24 @@ Tuple<int,int> DaadgineUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
         //skripti.Sql.Dump();
 		minicUnnomebi += con.Execute(skripti.Sql, commandTimeout:9999);
 	}
-    return Tuple.Create(minicUnnomebi,con.Query<int>("select count(*) from " + ckhrili.Sakheli + " where Unnom is null").First ());
+    return Tuple.Create(minicUnnomebi,con.Query<int>("select count(*) from " + ckhrili.Sakheli + " where Unnom is null", commandTimeout:9999).First ());
 }
 void Gaduble(int u1,int u2)
 {
-    RunInTransaction(con=>con.Execute(@"exec UketesiReestri.dbo.[spGadublva] 'select "+u1+" S_Unnom, "+u2+" R_Unnom '"));
+    RunInTransaction(con => con.Execute(@"exec UketesiReestri.dbo.[spGadublva] 'select "+u1+" S_Unnom, "+u2+" R_Unnom '",commandTimeout:9999));
 }
-void MianicheUnnomebi(IDbConnection con, UnnomCkhrili ckhrili)
+public static class ConTranExtensions
+{
+	public static int Execute(this Tuple<SqlConnection,  SqlTransaction> contr, string sql, object param=null, int? commandTimeout=null, CommandType? commandType=null)
+	{
+		return contr.Item1.Execute(sql,param,contr.Item2,commandTimeout,commandType);
+	}
+	public static IEnumerable<T> Query<T>(this Tuple<SqlConnection,  SqlTransaction> contr, string sql, object param=null,bool buffered=true,int? commandTimeout=null, CommandType? commandType=null)
+	{
+		return contr.Item1.Query<T>(sql,param,contr.Item2,buffered,commandTimeout,commandType);
+	}
+}
+void MianicheUnnomebi(Tuple<SqlConnection,  SqlTransaction> con, UnnomCkhrili ckhrili)
 {
     var minichebuliUnnomebi = 0;
     foreach(var bt in ckhrili.BaseTypes(s=>con.Query<int>(s)))
@@ -320,25 +334,26 @@ private Dictionary<string,Dictionary<string,string>> mapDict=@"
 
 	
 	
-void RunInTransaction(Action<IDbConnection> action)
+void RunInTransaction(Action<Tuple<SqlConnection,  SqlTransaction>> action)
 {
-	try
-	{
 		using(var con = new SqlConnection("Data Source=Triton;User ID=sa;Password=ssa$20;Initial Catalog=Pirvelckaroebi;app=LINQPad SHEDAREBAAA"))
 		{
-			using(var tr = new TransactionScope(TransactionScopeOption.RequiresNew,TimeSpan.FromDays(1)))
+			con.Open();
+			
+			using(var tr = con.BeginTransaction())
 			{
-				con.Open();
-				action(con);
-				tr.Complete();
+				try
+				{
+					action(Tuple.Create(con, tr));
+					tr.Commit();
+				}
+				catch(Exception ex)
+				{
+					tr.Rollback();
+					throw new AggregateException(ex);
+				}
 			}
-		con.Close();
 		}
-	}
-	catch(Exception ex)
-	{
-		throw new AggregateException(ex);
-	}
 }
 
 public static class Ex

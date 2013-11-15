@@ -1,19 +1,19 @@
 <Query Kind="Program">
   <Connection>
-    <ID>b80047fa-bbc6-4c50-97ff-0a369e02fa91</ID>
-    <Persist>true</Persist>
+    <ID>ced05258-b3f5-4292-8b8d-577da55d0081</ID>
     <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAIAg+Bd0cFE2ekrmjntd3ggAAAAACAAAAAAAQZgAAAAEAACAAAAAD89x4SL38S/4r7NUU2iHNNTcmnVTi1xQPx1AC1vAtFAAAAAAOgAAAAAIAACAAAABgO+xVBio0IKzceIXWbWfgFv0jcxQpOA9YilhDtPA8XxAAAABJcM5+MLInsGd5jUUGfXtnQAAAALHy7sVof5cKLhfpSHxbLdPESALwKOWLElOgeYcZmaeqO1sDG9SHnPN5xOzSlBHlSD7agk+KC9dH/4XMZn4gYvM=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAN27c6lA2WkeiuPoKsF6zVAAAAAACAAAAAAAQZgAAAAEAACAAAAAe6fEoA74iMkrfJZa6XuxfzQh6cY+5cD/VGmkvkAFZHgAAAAAOgAAAAAIAACAAAAAvSa58+4v5Ek9QdqmoHFRtbjSsRtGtZOiiFFwZuP9l4hAAAADSD159L0suWS7o5rny5Q3sQAAAAFcvMLTxKkyAI0tWzIRYIyYLH7PYk2LvzCPR+00AaEffUskcT8F2IaOy6O9Btu50kIHx2PxD4ahCWKTfrpSexFY=</Password>
     <Database>Pirvelckaroebi</Database>
     <ShowServer>true</ShowServer>
+    <Persist>true</Persist>
   </Connection>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.Smo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\100\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll</Reference>
+  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll</Reference>
   <NuGetReference>Dapper</NuGetReference>
   <Namespace>Dapper</Namespace>
   <Namespace>Microsoft.SqlServer.Management.Common</Namespace>
@@ -40,11 +40,55 @@ class PirvelckarosCkhrilebi
 }
 void Main()
 {
+//(
+//	from db in Ex.Triton.Databases()
+//	where db.Name.StartsWith("INSURANCEW")
+//	from table in db.Tables()
+//	where table.Name.StartsWith("DAZGVEVA_201309")
+//	from index in table.Indexes.Cast<Index>()
+//	select new {index.Name,Cols = index.IndexedColumns.Cast<IndexedColumn>().Select (ic => new {ic.Name,ic.IsIncluded})}
+//).Dump();
+//return;
+//Ex.Triton.Databases["INSURANCEW"]
+//	.Tables().Select (x => new {x.Name,x.DateLastModified}).OrderBy (x => x.DateLastModified).Dump();
+//return;
+//var dbName = "INSURANCEW";
+//var q = Ex.Triton.Databases[dbName]
+//	.Tables().Where (x => x.Name.StartsWith("DAZGVEVA_"))
+//	.Where (t => t.Indexes().Count () > 0)
+//	
+//	.OrderBy (x => x.Name)
+//	.Select(t => new {TName=t.Name,DropSql=t.Indexes().Select (i => string.Format("--Indexed:{4} Included:{5}\nDROP INDEX [{0}] ON [{3}].[dbo].[{1}] -- {2:N}kb",i.Name,t.Name,i.SpaceUsed,dbName,string.Join(",",i.IndexedColumns().Where (x => !x.IsIncluded).Select (ic => ic.Name)),string.Join(",",i.IndexedColumns().Where (x => x.IsIncluded).Select (ic => ic.Name))))})
+//	.Select (t => string.Format("--{0}\n{1}",t.TName,string.Join("\nGO\n",t.DropSql)))
+//	;
+//string.Join("\nGO\n\n\n\n",q).Dump();
+//return;
+//
+//(
+//	from db in Ex.Triton.Databases()
+//	from f in 	(
+//					from fg in db.FileGroups.Cast<FileGroup>()
+//					from file in fg.Files.Cast<DataFile>()
+//					select new {file.FileName,file.Size}
+//				).Concat(
+//					from log in db.LogFiles.Cast<LogFile>()
+//					select new {log.FileName, log.Size}
+//				)
+//	select new {db.Name, f.FileName, f.Size, DateLastModified = db.Tables().Select(table => table.DateLastModified).OrderByDescending (x=>x).FirstOrDefault ()}
+//).Cache()
+//.Dump();
+//
+////Ex.Triton.Databases()
+////	.SelectMany (d => d.LogFiles.Cast<LogFile>().Select(lf => new {lf.FileName,lf.Size,d.Name})
+////							   .Concat(d.FileGroups.Cast<FileGroup>().SelectMany (fg => fg.Files.Cast<DataFile>().Select (df => new {df.FileName,df.Size,d.Name})))
+////					).Select (x => new {PathRoot=Path.GetPathRoot(x.FileName),x.FileName,x.Name,x.Size}).Dump();
+//
+//return;
 Func<string,bool,string> gaakhvie = (s,isUnicode) =>
 @"ltrim(rtrim(replace(replace(replace(replace(replace(replace(replace(replace(replace("+(isUnicode?"Pirvelckaroebi.dbo.fn_con2utf8([" + s + @"])":"[" + s + @"]")+",nchar(10),' '),nchar(13),' '),nchar(9),' '),'   ',' '),'   ',' '),'   ',' '),'  ',' '),'  ',' '),'  ',' ')))";
 
 this.Connection.Open();
-var z = this.Connection.Query("SELECT TABLE_NAME,COLUMN_NAME,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME like 'Pirvelckaro%'")
+var z = this.Connection.Query("SELECT TABLE_NAME,COLUMN_NAME,DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME in (SELECT distinct TABLE_NAME FROM INFORMATION_SCHEMA.COLUMNS where TABLE_NAME like 'Pirvelckaro%' and COLUMN_NAME='SourceDataId') order by TABLE_NAME, COLUMN_NAME")
 	.Select (x => new {TABLE_NAME=(string)x.TABLE_NAME,COLUMN_NAME=(string)x.COLUMN_NAME,DATA_TYPE=((string)x.DATA_TYPE).ToLower()})
 	.OrderBy (x => x.TABLE_NAME)
 	.Where (x => x.DATA_TYPE == "nvarchar" || x.DATA_TYPE == "varchar" || x.DATA_TYPE == "nchar" || x.DATA_TYPE == "char")
@@ -55,8 +99,9 @@ var xs = z
 .GroupBy (x => x.TABLE_NAME)
 .Select (g => new {
 		TABLE_NAME=g.Key,
-		Sql="\n\nupdate s\nSET "+string.Join("\n, ", g.Select (x => "[" + x.COLUMN_NAME + "] = "+gaakhvie(x.COLUMN_NAME,x.IsUnicode)))+"\n,s.Gakrechilia=1 \n--select count(*)\nfrom ["+g.Key+"] s where Gakrechilia is null \ngo"
+		Sql="\n\nPRINT '"+g.Key+"'\nupdate s\nSET "+string.Join(", ", g.Select (x => "[" + x.COLUMN_NAME + "] = "+gaakhvie(x.COLUMN_NAME,x.IsUnicode)))+"\n,s.Gakrechilia=1 \n--select count(*)\nfrom ["+g.Key+"] s where Gakrechilia is null \ngo"
 });
+string.Join(" UNION ALL\n",xs.Select (x => "select '"+x.TABLE_NAME+"' tname, year(RecDate)*100+month(RecDate) periodi  FROM ["+x.TABLE_NAME+"] WHERE RecDate>='20130701'")).Dump();
 foreach (var x in xs)
 {
 	x.Sql.Dump();

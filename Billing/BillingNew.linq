@@ -1,11 +1,11 @@
 <Query Kind="Program">
   <Connection>
-    <ID>b80047fa-bbc6-4c50-97ff-0a369e02fa91</ID>
+    <ID>393fc2a1-3d2f-4fc3-8b9d-c916c0bb1c52</ID>
     <Persist>true</Persist>
     <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAIAg+Bd0cFE2ekrmjntd3ggAAAAACAAAAAAAQZgAAAAEAACAAAAAD89x4SL38S/4r7NUU2iHNNTcmnVTi1xQPx1AC1vAtFAAAAAAOgAAAAAIAACAAAABgO+xVBio0IKzceIXWbWfgFv0jcxQpOA9YilhDtPA8XxAAAABJcM5+MLInsGd5jUUGfXtnQAAAALHy7sVof5cKLhfpSHxbLdPESALwKOWLElOgeYcZmaeqO1sDG9SHnPN5xOzSlBHlSD7agk+KC9dH/4XMZn4gYvM=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAN27c6lA2WkeiuPoKsF6zVAAAAAACAAAAAAAQZgAAAAEAACAAAACbLLAsNsDt7paFHc5L9mKrBtKrPuHB+O2Pe8qohNTpzwAAAAAOgAAAAAIAACAAAAARwiWVIvi4yqvM5LGOqZqOnRK7TKpCRjPXZ7PkGNEFvxAAAAA0DMltrt8SinSUpeRajEf6QAAAACzIm5Lx/1cDUpvEPcBjgOVVcG4y9njzOG5jRo3BFxCqffNXq8PX7vXvt6t2LlSsl7mTqha7tgg+9E46F4mXHMQ=</Password>
     <Database>SocialuriDazgveva</Database>
     <ShowServer>true</ShowServer>
   </Connection>
@@ -20,38 +20,65 @@
 void Main()
 {
 	this.Connection.Open();
-//	var gadaxdiliPaketebi = new HashSet<string>(this.Connection.Query<string>(@"
-//SELECT PaketisNomeri
-//FROM   [SocialuriDazgveva].[dbo].[BillingGankhorcielebuliVizitebi]
-//WHERE  FName in ( 'GankhorcielebuliVizitebi_165_2012xx',
-//                  'GankhorcielebuliVizitebi_165_2012x3',
-//                  'GankhorcielebuliVizitebi_165_2012x4korektirebuli',
-//                  'GankhorcielebuliVizitebi_165_2012x5',
-//                  'GankhorcielebuliVizitebi_165_2012x6'
-//                ) 
-//AND    (    (Chambarebeli = 'Banki'    AND Chabarda          = 'Chabarda')
-//         OR (Chabarda     = 'Chabarda' AND KontraktiGaformda = 'KontraktiGaformda')
-//         OR (Dadgenileba  = 218        AND Chambarebeli      = 'Fosta' AND KontraktiGaformda = 'KontraktiGaformda')
-//       )"));
+	var gadaxdiliPaketebi = new HashSet<string>(this.Connection.Query<string>(@"
+SELECT PaketisNomeri
+FROM   [SocialuriDazgveva].[dbo].[GankhorcielebuliVizitebi]
+WHERE  FileName in (  'GankhorcielebuliVizitebi_165_2012xx'
+				  ,'GankhorcielebuliVizitebi_165_2012x3'
+				  ,'GankhorcielebuliVizitebi_165_2012x4korektirebuli'
+				  ,'GankhorcielebuliVizitebi_165_2012x5'
+				  ,'GankhorcielebuliVizitebi_165_2012x6'
+				  ,'GankhorcielebuliVizitebi_165_2012x7'
+				  ,'GankhorcielebuliVizitebi_165_2013x8'
+
+				  ,'GankhorcielebuliVizitebi201203'
+				  ,'GankhorcielebuliVizitebi201204'
+				  ,'GankhorcielebuliVizitebi201205'
+				  ,'GankhorcielebuliVizitebi201206'
+				  ,'GankhorcielebuliVizitebi_218_201207'
+				  ,'GankhorcielebuliVizitebi_218_201208'
+				  ,'GankhorcielebuliVizitebi_218_201209'
+				  ,'GankhorcielebuliVizitebi_218_201210'
+				  ,'GankhorcielebuliVizitebi_218_201211'
+				  ,'GankhorcielebuliVizitebi_218_201212'
+				  ,'GankhorcielebuliVizitebi_218_201301'
+                ) 
+AND    (    (Chambarebeli = 'Banki'    AND Chabarda          = 'Chabarda')
+         OR (Chabarda     = 'Chabarda' AND KontraktiGaformda = 'KontraktiGaformda')
+         OR (Dadgenileba  = 218        AND Chambarebeli      = 'Fosta' AND KontraktiGaformda = 'KontraktiGaformda')
+       )"));
 //	var gamortmeuliPolisebi = new HashSet<string>(this.Connection.Query<string>(@"
-//SELECT Polisebi
-//FROM [SocialuriDazgveva].[dbo].[BillingChabarebuliPaketebi]
-//WHERE FName in ( 'ChabarebuliPaketebi_165_2012xx_Yvela',
-//                 'ChabarebuliPaketebi_165_2012x3_Yvela',
-//				 'ChabarebuliPaketebi_165_2012x4_Yvela_korektirebuli',
-//                 'ChabarebuliPaketebi_165_2012x5_Yvela',
-//                 'ChabarebuliPaketebi_165_2012x6_Yvela'
-//			   )")
-//			.SelectMany (s => s.Split(',',' '))
-//			.Select (s => s.Trim())
-//			.Where (s => s.Length == 9)
-//			.Where (s => s.All(Char.IsNumber))
-//			);	   
-	var periodi="201212";
+//SELECT PolisisNomeri
+//FROM [SocialuriDazgveva].[dbo].[ChabarebuliPaketebi]
+//WHERE FileName in ( 'ChabarebuliPaketebi_165_2012xx_Yvela'
+//				,'ChabarebuliPaketebi_165_2012x3_Yvela'
+//				,'ChabarebuliPaketebi_165_2012x4_Yvela_korektirebuli'
+//				,'ChabarebuliPaketebi_165_2012x5_Yvela'
+//				,'ChabarebuliPaketebi_165_2012x6_Yvela'
+//				,'ChabarebuliPaketebi_165_2012x7_Yvela'
+//			    ,'ChabarebuliPaketebi_165_2013x8_Yvela'
+//			 
+//			    ,'ChabarebuliPaketebi_201203_Yvela'
+//			    ,'ChabarebuliPaketebi_201204_Yvela'
+//			    ,'ChabarebuliPaketebi_201205_Yvela'
+//			    ,'ChabarebuliPaketebi_201206_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201207_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201208_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201209_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201210_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201211_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201212_Yvela'
+//			    ,'ChabarebuliPaketebi_218_201301_Yvela'
+//			   )"));	   
+//	gadaxdiliPaketebi.Count().Dump();
+//	gamortmeuliPolisebi.Count().Dump();
+
+	var periodi="2013x9";
 	var chabarebebi = PolisisChabarebisIstorias
+						.Where (i => i.Polisebi.ShekmnisTarigi>DateTime.Parse("2012-10-01"))
 						.SelectMany(i => VGadarickhvaFull.Where(g=>g.PolisisNomeri==i.PolisisNomeri).DefaultIfEmpty().Select(g => new { i, g }))
-						.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
-						.Where (x => x.i.Polisebi.ProgramisId < 20)
+//						.Where (x => (x.i.Polisebi.ShekmnisTarigi.Year * 100 + x.i.Polisebi.ShekmnisTarigi.Month).ToString() == periodi)
+//						.Where (x => x.i.Polisebi.ProgramisId < 20)
 						.Where (x => x.i.VizitisTarigi.Date < x.i.Polisebi.ChabarebisBoloVada.Date  )
 						.Select (x => new {	x.i.PaketisNomeri,
 											Chambarebeli = x.i.Chambarebeli == "Socagenti" || x.i.Chambarebeli == "Banki" || x.i.Chambarebeli == "Fosta" ? x.i.Chambarebeli : "AdgilidanGacema",
@@ -64,6 +91,7 @@ void Main()
                                             VizitisPeriodi = x.i.VizitisTarigi.Year*100+x.i.VizitisTarigi.Month,
 											Dadgenileba = x.i.Polisebi.ProgramisId < 20 ? 218 : 165,
 										}).ToList();
+	return;
 	var paketebi = (
 		from pci in chabarebebi
 //		where !gadaxdiliPaketebi.Contains(pci.PaketisNomeri)
