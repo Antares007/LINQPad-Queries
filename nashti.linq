@@ -2,8 +2,8 @@
   <Reference>&lt;RuntimeDirectory&gt;\Accessibility.dll</Reference>
   <Reference>D:\anycpu\EventStore.ClientAPI.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Microsoft.CompilerServices.AsyncTargetingPack.Net4.dll</Reference>
-  <Reference>&lt;ProgramFilesX86&gt;\Microsoft Visual Studio 11.0\Visual Studio Tools for Office\PIA\Office14\Microsoft.Office.Interop.Excel.dll</Reference>
-  <Reference Relative="..\Visual Studio 2013\Projects\Nashti.Core\Nashti.Core\bin\Debug\Nashti.Core.dll">&lt;MyDocuments&gt;\Visual Studio 2013\Projects\Nashti.Core\Nashti.Core\bin\Debug\Nashti.Core.dll</Reference>
+  <Reference>C:\Windows\assembly\GAC_MSIL\Microsoft.Office.Interop.Excel\14.0.0.0__71e9bce111e9429c\Microsoft.Office.Interop.Excel.dll</Reference>
+  <Reference Relative="..\..\Desktop\Nashti.Core.dll">C:\Users\Archil\Desktop\Nashti.Core.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Raven.Abstractions.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Raven.Client.Lightweight.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\System.Configuration.dll</Reference>
@@ -28,8 +28,8 @@
   <Namespace>System.Drawing.Imaging</Namespace>
   <Namespace>System.Globalization</Namespace>
   <Namespace>System.Net</Namespace>
-  <Namespace>System.Windows.Forms</Namespace>
   <Namespace>System.Security.Cryptography</Namespace>
+  <Namespace>System.Windows.Forms</Namespace>
 </Query>
 
 DateTime TarigiFailisSakhelidan(string fn)
@@ -532,17 +532,19 @@ var migeba = Migebebi(shekveta);
 //	;
 //return;
 
-chekebi
-	.SelectMany (cheki => cheki.gadakhdebi
-								.Select (g => new {Dro=cheki.Dro.LocalDateTime,cheki.Mdebareoba,g.forma,g.tankha,Shenishvna=(string)cheki.Nomeri})
-				)
-.Concat(
-	gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))	
-		.Select (x => new {x.Dro, Mdebareoba=x.Saidan, forma="n/a", tankha = x.Chanacerebi.Sum (c => c.Jami.Value), Shenishvna=(string)x.Key})
-	)
-	.Select (g => new {Tve = g.Dro.Year * 100 + g.Dro.Month, Dge = g.Dro.Date, g.Dro, g.Mdebareoba, g.forma, Tankha = g.tankha, g.Shenishvna })
-	.Dump();
-return;
+
+
+//chekebi
+//	.SelectMany (cheki => cheki.gadakhdebi
+//								.Select (g => new {Dro=cheki.Dro.LocalDateTime,cheki.Mdebareoba,g.forma,g.tankha,Shenishvna=(string)cheki.Nomeri})
+//				)
+//.Concat(
+//	gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))	
+//		.Select (x => new {x.Dro, Mdebareoba=x.Saidan, forma="n/a", tankha = x.Chanacerebi.Sum (c => c.Jami.Value), Shenishvna=(string)x.Key})
+//	)
+//	.Select (g => new {Tve = g.Dro.Year * 100 + g.Dro.Month, Dge = g.Dro.Date, g.Dro, g.Mdebareoba, g.forma, Tankha = g.tankha, g.Shenishvna })
+//	.Dump();
+////return;
 
 //return;
 
@@ -671,52 +673,51 @@ var gatarebebi =
 .Concat(
 	moves.Select (m => new {l=m.t,Ref="'"+m.Ref,m.Raodenoba, Tankha=m.Jami, m.Dro})
 ).Where (x => x.Dro < dt)
-.GroupBy (m => new {m.l, Periodi = m.Dro.Year * 100 + m.Dro.Month})
-.Select (g => new{ g.Key.l, g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba),Tankha=g.Sum (x => x.Tankha)}).Dump()
-//.GroupBy (x => new {x.l, x.Ref, Periodi=x.Dro.Year*100+x.Dro.Month})
-//.Select (g => new {g.Key.l, g.Key.Ref,g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)})
+//.GroupBy (m => new {m.l, Periodi = m.Dro.Year * 100 + m.Dro.Month})
+//.Select (g => new{ g.Key.l, g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba),Tankha=g.Sum (x => x.Tankha)}).Dump()
+.GroupBy (x => new {x.l, x.Ref, Periodi=x.Dro.Year*100+x.Dro.Month})
+.Select (g => new {g.Key.l, g.Key.Ref,g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)})
 ;
 
 var refDict = refebi.GroupBy (r => momeRefi(r.Id, r.Dasakheleba)).ToDictionary (g => g.Key, g=>g.First ());
-return;
-//Util.WriteCsv(
-//	(
-//		from r in gatarebebi
-//		select new {r.Ref,r.Periodi,l=r.l+" stock (qty)",value=r.Raodenoba}
-//	).Concat(
-//		from t in gatarebebi
-//		select new {t.Ref,t.Periodi,l=t.l+" stock (purch. price)",value=(double)t.Tankha}
-//	).Concat(
-//		chekebi.Where (c => c.Dro < dt).SelectMany (d => d.Chanacerebi
-//					.Select (x => new {Ref="'"+x.Ref, Periodi = d.Dro.Year*100+d.Dro.Month,l=d.Mdebareoba+" sales (sum+vat)",value=(double)x.FasdaklebuliJami})
-//				)
-//	.Concat(
-//		gadaadgilebebi.Where (g => g.Dro < dt).Where (x => x.Sad.ToLower().StartsWith("gak"))
-//				.SelectMany (d => d.Chanacerebi
-//					.Select (x => new {Ref="'"+x.Ref,Periodi = d.Dro.Year*100+d.Dro.Month,l=d.Saidan+" sales (sum+vat)",value=(double)x.Jami.Value})
-//				)
-//				
-//		).GroupBy (x => new {x.Ref,x.l,x.Periodi})
-//		.Select (g => new {g.Key.Ref,g.Key.Periodi,g.Key.l, value = g.Sum (x => x.value)})
-//	
-//	).Select (wc => {
-//		var l  = wc.l.Replace("gakidvebi/batumi", "batumi sales")
-//					.Replace("gakidvebi/merani", "merani sales")
-//					
-//					.Replace("gakidvebi stock (qty)", "warehouse sales stock (qty)")
-//					.Replace("gakidvebi stock (purch. price)", "warehouse sales stock (purch. price)")
-//					.Replace("sackobi sales (sum+vat)", "warehouse sales stock (sum+vat)")
-//					.Replace("sackobi stock (purch. price)", "warehouse stock (purch. price)")
-//					.Replace("sackobi stock (qty)", "warehouse stock (qty)")
-//					.Replace("sheskidvebi stock (purch. price)", "total purchase stock (purch. price)")
-//					.Replace("sheskidvebi stock (qty)", "total purchase stock (qty)")
-//					;
-//		Refi re = null;
-//		refDict.TryGetValue(wc.Ref.Substring(1),out re);
-//		return new {wc.Ref,Dasakheleba=re==null?"":re.Dasakheleba,Ean="'"+(re==null?"":string.Join(";",re.Eans)),wc.Periodi,l,wc.value};
-//	})
-//, @"d:\anvol\nashtebi" + dt.ToString("yyyy-MM-dd") + ".csv")
-//;
+Util.WriteCsv(
+	(
+		from r in gatarebebi
+		select new {r.Ref,r.Periodi,l=r.l+" stock (qty)",value=r.Raodenoba}
+	).Concat(
+		from t in gatarebebi
+		select new {t.Ref,t.Periodi,l=t.l+" stock (purch. price)",value=(double)t.Tankha}
+	).Concat(
+		chekebi.Where (c => c.Dro < dt).SelectMany (d => d.Chanacerebi
+					.Select (x => new {Ref="'"+x.Ref, Periodi = d.Dro.Year*100+d.Dro.Month,l=d.Mdebareoba+" sales (sum+vat)",value=(double)x.FasdaklebuliJami})
+				)
+	.Concat(
+		gadaadgilebebi.Where (g => g.Dro < dt).Where (x => x.Sad.ToLower().StartsWith("gak"))
+				.SelectMany (d => d.Chanacerebi
+					.Select (x => new {Ref="'"+x.Ref,Periodi = d.Dro.Year*100+d.Dro.Month,l=d.Saidan+" sales (sum+vat)",value=(double)x.Jami.Value})
+				)
+				
+		).GroupBy (x => new {x.Ref,x.l,x.Periodi})
+		.Select (g => new {g.Key.Ref,g.Key.Periodi,g.Key.l, value = g.Sum (x => x.value)})
+	
+	).Select (wc => {
+		var l  = wc.l.Replace("gakidvebi/batumi", "batumi sales")
+					.Replace("gakidvebi/merani", "merani sales")
+					
+					.Replace("gakidvebi stock (qty)", "warehouse sales stock (qty)")
+					.Replace("gakidvebi stock (purch. price)", "warehouse sales stock (purch. price)")
+					.Replace("sackobi sales (sum+vat)", "warehouse sales stock (sum+vat)")
+					.Replace("sackobi stock (purch. price)", "warehouse stock (purch. price)")
+					.Replace("sackobi stock (qty)", "warehouse stock (qty)")
+					.Replace("sheskidvebi stock (purch. price)", "total purchase stock (purch. price)")
+					.Replace("sheskidvebi stock (qty)", "total purchase stock (qty)")
+					;
+		Refi re = null;
+		refDict.TryGetValue(wc.Ref.Substring(1),out re);
+		return new {wc.Ref,Dasakheleba=re==null?"":re.Dasakheleba,Ean="'"+(re==null?"":string.Join(";",re.Eans)),wc.Periodi,l,wc.value};
+	})
+, @"d:\anvol\nashtebi" + dt.ToString("yyyy-MM-dd") + ".csv")
+;
 return;
 //(
 //
