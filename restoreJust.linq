@@ -4,7 +4,7 @@
     <Server>Triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAN27c6lA2WkeiuPoKsF6zVAAAAAACAAAAAAAQZgAAAAEAACAAAAAe6fEoA74iMkrfJZa6XuxfzQh6cY+5cD/VGmkvkAFZHgAAAAAOgAAAAAIAACAAAAAvSa58+4v5Ek9QdqmoHFRtbjSsRtGtZOiiFFwZuP9l4hAAAADSD159L0suWS7o5rny5Q3sQAAAAFcvMLTxKkyAI0tWzIRYIyYLH7PYk2LvzCPR+00AaEffUskcT8F2IaOy6O9Btu50kIHx2PxD4ahCWKTfrpSexFY=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA2LGCigg0bUqfvV+5fr69FwAAAAACAAAAAAAQZgAAAAEAACAAAABQjNqSoAChVc7pY40t5LwDSBgnqpqKpfGpztnrGU+Y2wAAAAAOgAAAAAIAACAAAACCDIBRLvjlNFjqIX5467Yafqrbi6HdDapIvcUgoSj9PxAAAABbOvffR/aHk+Wx3Yeu7FoiQAAAAC4eTdCoj/RY73eNWXEwWXOmecEVUn5J058U5ATdQJGxHG/+oeJKVPpg+FeqWtSGeM7adASTT3h8vPCAuNfk9Yk=</Password>
     <Database>Pirvelckaroebi</Database>
     <ShowServer>true</ShowServer>
     <Persist>true</Persist>
@@ -83,7 +83,7 @@ void Main()
 {
 //GetFileList2("localhost","anonymous",null).Dump();
 //return;
-Restore(@"J:\ShareForBakRestore\pens_dazgveva201311","forDeldazgveva20131101");
+Restore(@"J:\ShareForBakRestore\pens_dazgveva_20131225","forDeldazgveva20140101");
 
 //GetFileList("81.95.168.42","moh","(Jan-Dacva)").Dump();
 return ;

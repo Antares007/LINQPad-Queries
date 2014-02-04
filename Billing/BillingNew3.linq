@@ -1,4 +1,14 @@
 <Query Kind="Program">
+  <Connection>
+    <ID>393fc2a1-3d2f-4fc3-8b9d-c916c0bb1c52</ID>
+    <Server>Triton</Server>
+    <SqlSecurity>true</SqlSecurity>
+    <UserName>sa</UserName>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA2LGCigg0bUqfvV+5fr69FwAAAAACAAAAAAAQZgAAAAEAACAAAACcweYNfVdHbduk84GFtEdAPuSkqyq1f325WOB4ML95NAAAAAAOgAAAAAIAACAAAAD36Sg/oROiTUg/42mIUi6NiAfDI74nSKxIv07xmKcvtBAAAAB2muXkj5NigwmlBpZY/1pIQAAAAFksUka7cbQZQT6Q1yIE0ma77Yk31wW4wRSQ4l3uFjF52bpNqR0IC7RQ8f9J/ibc6PgXSfcWBPmK6ilXFruEoz8=</Password>
+    <Database>SocialuriDazgveva</Database>
+    <ShowServer>true</ShowServer>
+    <Persist>true</Persist>
+  </Connection>
   <Reference>D:\Dev\Libs\EPPlus\EPPlus.dll</Reference>
   <NuGetReference>Dapper</NuGetReference>
   <Namespace>Dapper</Namespace>
@@ -12,10 +22,11 @@ void Main()
 	var con = this.Connection;
 	con.Open();
 
-	var periodi = "201310";
-	var cinaPeriodi = DateTime.Parse(periodi.Insert(4,"-") + "-01").AddMonths(-1).ToString("yyyyMM").Dump();
-//	sql.Replace("{periodi}", periodi).Dump();
-//	return;
+	var periodi = "201401";
+	var cinaPeriodi = DateTime.Parse(periodi.Insert(4,"-") + "-01").AddMonths(-1).ToString("yyyyMM");
+	sql.Replace("{periodi}", periodi).Dump();
+	
+	return;
 	var fileNames = string.Join(",", (new []{periodi,cinaPeriodi}).Select (x => string.Format("'GankhorcielebuliVizitebi_ALL_{0}'",x)));
 	var misacemi = (
 	from x in con.Query(@"select * from [GankhorcielebuliVizitebi] where FileName in ("+fileNames+") and VizitisPeriodi=" + cinaPeriodi)
@@ -47,9 +58,9 @@ void Main()
 	foreach (var dad in new []{"218", "165"})
 	{
 		Ext.ToExcel(misacemi.Where (m => m.Dadgenileba == dad), "GankhorcielebuliVizitebi_v2_" + dad + "_" + periodi);
-//		Ext.ToExcel(gamosartmeviPaketebi      .Where (m => m.Dadgenileba == dad), "ChabarebuliPaketebi_" + dad + "_"  + periodi + "_Yvela");
-//		foreach(var g in gamosartmeviPaketebi .Where (m => m.Dadgenileba == dad) .GroupBy (g => g.MzgveveliKompaniisKodi))
-//			Ext.ToExcel(g, "ChabarebuliPaketebi_" + dad.ToString() + "_" + periodi + "_" + g.Key);
+		Ext.ToExcel(gamosartmeviPaketebi      .Where (m => m.Dadgenileba == dad), "ChabarebuliPaketebi_" + dad + "_"  + periodi + "_Yvela");
+		foreach(var g in gamosartmeviPaketebi .Where (m => m.Dadgenileba == dad) .GroupBy (g => g.MzgveveliKompaniisKodi))
+			Ext.ToExcel(g, "ChabarebuliPaketebi_" + dad.ToString() + "_" + periodi + "_" + g.Key);
 	}
 }
 

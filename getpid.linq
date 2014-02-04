@@ -37,6 +37,7 @@ void execMisamartisKorektireba(SqlConnection conn, string piradiNomeri, string r
 			.Dump();
 	}
 }
+
 void ganckhadebisMisamartisKorektireba(SqlConnection conn, string piradiNomeri, string raioni, string misamarti)
 {
 	
@@ -60,16 +61,18 @@ void ganckhadebisMisamartisKorektireba(SqlConnection conn, string piradiNomeri, 
 	}
 	
 }
-async void Main()
+
+
+void Main()
 {
-	var r = await daakorektire("01954003059");
-	r.Dump();
+	var r = daakorektire("41001018222").Result;
+	string.Join(", ", r.Values)	.Dump();
 	using (var conn = new SqlConnection(@"Data Source=triton;Initial Catalog=INSURANCEW;Persist Security Info=True;User ID=sa;Password=ssa$20"))
 	{
 		conn.Open();
-//		execMisamartisKorektireba(conn, "01655003823", "ნაძალადევი", "თბილისი, ნაძალადევი, თბილისის ზღვის დას. თბილისის ზღვა");
+//		execMisamartisKorektireba(conn, "01150044885", "ვაკე-საბურთალო", "ვაკე, ბაგეები, წყნეთის გზატკ. ბაგეების სტუდქალაქი კორპ 5");
 		execMisamartisKorektireba(conn, r["piradiNomeri"], r["raioni"], r["misamarti"]);
-		//ganckhadebisMisamartisKorektireba(conn, r["piradiNomeri"], r["raioni"], r["misamarti"]);
+		ganckhadebisMisamartisKorektireba(conn, r["piradiNomeri"], r["raioni"], r["misamarti"]);
 	}
 }
 
@@ -91,4 +94,3 @@ public class PersonInformacia{
 	public string LastName { get; set; }
 	public DateTime BirthDate { get; set; }
 }
-// Define other methods and classes here

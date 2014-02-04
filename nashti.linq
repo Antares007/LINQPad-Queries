@@ -3,33 +3,43 @@
   <Reference>D:\anycpu\EventStore.ClientAPI.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Microsoft.CompilerServices.AsyncTargetingPack.Net4.dll</Reference>
   <Reference>C:\Windows\assembly\GAC_MSIL\Microsoft.Office.Interop.Excel\14.0.0.0__71e9bce111e9429c\Microsoft.Office.Interop.Excel.dll</Reference>
-  <Reference Relative="..\..\Desktop\Nashti.Core.dll">C:\Users\Archil\Desktop\Nashti.Core.dll</Reference>
+  <Reference>D:\Dev\Nashti.Core\Nashti.Core\bin\Debug\Nashti.Core.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Raven.Abstractions.dll</Reference>
   <Reference>D:\RavenDB-Build-2700\Client\Raven.Client.Lightweight.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Configuration.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Deployment.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Drawing.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Net.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Runtime.Serialization.Formatters.Soap.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Security.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Windows.Forms.dll</Reference>
   <NuGetReference>CsvHelper</NuGetReference>
+  <NuGetReference>EPPlus</NuGetReference>
   <NuGetReference>Ix-Main</NuGetReference>
+  <NuGetReference>ServiceStack.Razor</NuGetReference>
   <NuGetReference>ServiceStack.Text</NuGetReference>
   <Namespace>CsvHelper</Namespace>
   <Namespace>CsvHelper.TypeConversion</Namespace>
   <Namespace>Microsoft.Office.Interop.Excel</Namespace>
   <Namespace>Nashti.Core</Namespace>
+  <Namespace>OfficeOpenXml</Namespace>
+  <Namespace>OfficeOpenXml.ConditionalFormatting</Namespace>
+  <Namespace>OfficeOpenXml.ConditionalFormatting.Contracts</Namespace>
+  <Namespace>OfficeOpenXml.DataValidation</Namespace>
+  <Namespace>OfficeOpenXml.DataValidation.Contracts</Namespace>
+  <Namespace>OfficeOpenXml.DataValidation.Formulas.Contracts</Namespace>
+  <Namespace>OfficeOpenXml.Drawing</Namespace>
+  <Namespace>OfficeOpenXml.Drawing.Chart</Namespace>
+  <Namespace>OfficeOpenXml.Drawing.Vml</Namespace>
+  <Namespace>OfficeOpenXml.Style</Namespace>
+  <Namespace>OfficeOpenXml.Style.Dxf</Namespace>
+  <Namespace>OfficeOpenXml.Style.XmlAccess</Namespace>
+  <Namespace>OfficeOpenXml.Table</Namespace>
+  <Namespace>OfficeOpenXml.Table.PivotTable</Namespace>
+  <Namespace>OfficeOpenXml.Utils</Namespace>
+  <Namespace>OfficeOpenXml.VBA</Namespace>
   <Namespace>Raven.Abstractions.Data</Namespace>
   <Namespace>Raven.Abstractions.Linq</Namespace>
+  <Namespace>Raven.Client.Connection</Namespace>
   <Namespace>Raven.Client.Document</Namespace>
   <Namespace>Raven.Json.Linq</Namespace>
-  <Namespace>System.Drawing</Namespace>
-  <Namespace>System.Drawing.Imaging</Namespace>
   <Namespace>System.Globalization</Namespace>
   <Namespace>System.Net</Namespace>
+  <Namespace>System.Runtime.Serialization.Formatters.Binary</Namespace>
   <Namespace>System.Security.Cryptography</Namespace>
-  <Namespace>System.Windows.Forms</Namespace>
 </Query>
 
 DateTime TarigiFailisSakhelidan(string fn)
@@ -37,6 +47,7 @@ DateTime TarigiFailisSakhelidan(string fn)
 	var fileName = Path.GetFileNameWithoutExtension( Path.GetDirectoryName(fn) );
 	return DateTime.Parse(fileName.Substring(fileName.Length-10), new CultureInfo("ka-ge"));
 }
+
 public string Hash(string temp)
 {
     using(SHA1CryptoServiceProvider sha1 = new SHA1CryptoServiceProvider()){
@@ -45,48 +56,7 @@ public string Hash(string temp)
 	return delimitedHexHash.Replace("-", "");
 	}
 }
-IEnumerable<PakingListi> PakingLists(Func<string,string,string> momeRefi,string path=@"D:\Anvol\Invoicebi\PakingLists")
-{
-	var valutebi = (
-		from wb  in DirSearch(path).ToWorkBooks()
-		from ws  in wb.Worksheets<Worksheet>()
-		let r = ws.Rng("A1:W20").ToRows().SelectMany (x => x).Select (x => x.GetString()).Where (x => !string.IsNullOrWhiteSpace(x)).Select (x => x.ToUpper()).ToList()
-		where r.Count > 3
-		select new {Wb = wb.Path + "\\" + wb.Name+"\\"+ ws.Name, Eur = r.Any(x=> x.Contains("EUR")), Usd = r.Any(x=>x.Contains("USD")) }
-	).ToList();
-	
-	if(valutebi.Any (v => v.Eur && v.Usd)){
-		throw new InvalidOperationException("ver dadginda Valuta");
-	}
-	var valutebiDic = valutebi.ToDictionary (x => x.Wb,x => x.Eur ? "EUR" : x.Usd ? "USD" : "GEL");
-	var q1 = (
-		from wb  in DirSearch(path).ToWorkBooks()
-		from ws  in wb.Worksheets<Worksheet>()
-		from r in ws.Rng("A1:W10000").ToRows()
-		select new {Wb = wb.Path + "\\" + wb.Name+"\\"+ ws.Name, SheetName = ws.Name, A=r[0].GetString(), B=r[1].GetString(), C=r[2].GetString(), D=r[3].GetDouble(), E=r[4].GetDecimal(), F=r[5].GetDecimal(), G=r[6], H=r[7], I=r[8], J=r[9].GetDouble(), K=r[10], L=r[11], M=r[12], N=r[13], O=r[14], P=r[15], Q=r[16], R=r[17], S=r[18], T=r[19], U=r[20],V=r[21],W=r[22] }
-	)
-	.Where (x => x.D.HasValue && x.E.HasValue && x.F.HasValue);
-	return (
-		from x in q1
-		group x by x.Wb into g
-		select new PakingListi {
-				Id=Hash(g.Key),
-				Shenishvna=g.Key,
-				Dro = TarigiFailisSakhelidan(g.Key),
-				Valuta = valutebiDic[g.Key],
-				Chanacerebi = g.Select ((x,i) => new PakingListi.Chanaceri{
-													Id = i.ToString(),
-													Ref = momeRefi(x.A, x.B),
-													Ean = x.C,
-													Dasakheleba = x.B,
-													Raodenoba = x.D.Value,
-													ErtFasi = x.E.Value,
-													Jami = Math.Round(x.F.Value,2),
-													Moculoba = x.J,
-													}).ToList()
-			}
-	);
-}
+
 IEnumerable<Tuple<string,List<string>>> Gadaadgileba(string path)
 {
 	return (
@@ -98,6 +68,7 @@ IEnumerable<Tuple<string,List<string>>> Gadaadgileba(string path)
 	.Where (x => x.Cols.Where (c => !string.IsNullOrWhiteSpace(c.GetString())).Count () > 1)
 	.Select (x => Tuple.Create(x.Wb, x.Cols));
 }
+
 public IEnumerable<dynamic> StreamDocs(string url, string doc, string database="Anvol"){
 		using(var docStore = (new DocumentStore() {	Url = url,
 													DefaultDatabase=database, 
@@ -130,59 +101,6 @@ public IEnumerable<dynamic> StreamQuery(string url, string index, string databas
 			}
 		}
 }
-[Serializable]
-public class Migeba
-{	
-	private IEnumerable<PakingListi> _shekvetebi;
-	public decimal _kharji;
-	public decimal _kursi;
-	public Migeba(IEnumerable<PakingListi> shekvetebi, decimal kharji, decimal kursi)
-	{
-		_shekvetebi = shekvetebi.ToList();
-		if(_shekvetebi.Select (x => new {x.Valuta, x.Dro}).Distinct().Count ()!=1){
-			throw new ArgumentException("shekvetebi");
-		}
-		_kharji = kharji;
-		_kursi = kursi;
-	}
-	public DateTime Dro { get{return _shekvetebi.First ().Dro;}}
-	public IEnumerable<Chanaceri> Chanacerebi 
-	{ 
-		get
-		{
-			var jami = _shekvetebi.SelectMany (x => x.Chanacerebi).Sum (x => x.Jami);
-			return (
-				from s in _shekvetebi
-				from c in s.Chanacerebi
-				select new Chanaceri{Ref = c.Ref, Dasakheleba = c.Dasakheleba, Raodenoba = c.Raodenoba, Jami = c.Jami * _kursi + _kharji * (c.Jami / jami), Shenishvna=s.Shenishvna}
-			);
-		}
-	}
-	
-	[Serializable]
-	public class Chanaceri
-	{
-		public string Ref { get; set;}
-		public string Ean {get;set;}
-		public string Dasakheleba { get; set; }
-		public double Raodenoba {get;set;}
-		public decimal ErtFasi {get; set;}
-		public decimal Jami { get; set; }
-		public string Shenishvna { get; set; }
-	}
-}
-
-IEnumerable<Migeba> Migebebi(IEnumerable<PakingListi> shekveta)
-{
-	var ertadGanbajebuli = migebebiDic.SelectMany(x => x.Item1).ToList();
-	return migebebiDic.Concat(
-			shekveta.Where (s => !ertadGanbajebuli.Contains(s.Shenishvna))
-					.Select (s => Tuple.Create(new List<string>{s.Shenishvna},0m,1m))
-			).Select (x => new {p1=x.Item1.SelectMany (i => shekveta.Where (s => s.Shenishvna==i)),p2=x.Item2,p3=x.Item3})
-			.Where (x => x.p1.Any ())
-			.Select (x => new Migeba(x.p1, x.p2, x.p3))
-			;
-}
 
 static string[] amosagebiStringebi = new []{"."," ","(",")","-","#",","};
 static string NormalizeString (string str)
@@ -197,237 +115,146 @@ IEnumerable<Refi> Refebi()
 				 .ToList();
 }
 
-void dokumentebisShekmna(){
-var shekveta = Util.Cache(() => 
-				 PakingLists((kodi, dasakheleba) => kodi,@"D:\Anvol\Invoicebi\PakingLists" )
-		.Concat( PakingLists((kodi, dasakheleba) => kodi,@"D:\Anvol\Invoicebi\PakingLists2") )
-		.Concat( PakingLists((kodi, dasakheleba) => kodi,@"D:\Anvol\Invoicebi\PakingLists3") )
-		.Concat( PakingLists((kodi, dasakheleba) => kodi,@"D:\Anvol\Invoicebi\PakingLists4") )
-		.ToList(), "PakingLists");
+class Projection
+{
+	public Dictionary<Type,int> dic = new Dictionary<Type,int>();
 
-var ertadGanbajebuli = migebebiDic.SelectMany(x => x.Item1).ToList();
-var migebebiDicKvela = migebebiDic.Concat(shekveta.Where (s => !ertadGanbajebuli.Contains(s.Shenishvna)).Select (s => Tuple.Create(new List<string>{s.Shenishvna},0m,1m)));
-(
-from d in migebebiDicKvela
-let pakingListebi = d.Item1.SelectMany (i => shekveta.Where(s => s.Shenishvna == i))
-select new {Kharji=d.Item2,Kursi=d.Item3,SulGirebuleba=pakingListebi.SelectMany (l => l.Chanacerebi).Sum (x => x.Jami), pakingListebi} into m
-from p in m.pakingListebi
-let Girebuleba = p.Chanacerebi.Sum (x => x.Jami)
-let SheskidvisKharji=Math.Round(m.Kharji*Girebuleba / m.SulGirebuleba, 2)
-select new {
-	SheetisMisamarti = p.Shenishvna,
-	Dro = new DateTimeOffset(p.Dro),
-	Kharji = SheskidvisKharji,
-	p.Valuta,
-	m.Kursi,
-	Chanacerebi = p.Chanacerebi.Select ((c,i) => new {
-									N = i,
-									MomcodeblisRefi = c.Ref,
-									c.Ean,
-									c.Dasakheleba,
-									c.Raodenoba,
-									c.Jami,
-									c.Moculoba,
-								})
-}
-).Store(x=>"sheskidva/" + x.SheetisMisamarti, "Sheskidvebi","http://office.anvol.ge:8080","Dokumentebi");
-
-	(
-		from wb in DirSearch(@"D:\Anvol\modzraobebi\").Where (x => !x.ToLower().Contains("gakid")).ToWorkBooks()
-		let pathSegments = wb.Path.Split('\\')
-		from ws  in wb.Worksheets<Worksheet>()
-		let rows = ws.Rng("A1:W5000").ToRows()
-		where rows.Any ()
-		let seg = wb.Path.Split('\\')
-		let sheetisMisamarti = Path.Combine(wb.Path, wb.Name) + "\\" + ws.Name
-		let fileName=Path.GetFileNameWithoutExtension(wb.Name)
-		select new {
-			Saidan = seg[3],
-			Sad = seg[4],
-			SheetisMisamarti = sheetisMisamarti,
-			Dro = DateTimeOffset.Parse(fileName.Substring(fileName.Length-10), new CultureInfo("ka-ge")),
-			Chanacerebi = rows	.Select ((col,i) => new {
-											N=i, 
-											Kodi=col[1].GetString(),
-											Dasakheleba=col[2].GetString(),
-											Raodenoba=col[4].GetDouble(),
-										})
-								.Where (c => c.Kodi != null && c.Raodenoba.HasValue)
+	public void Handle(Migeba d)
+	{ 
+		foreach (var c in d.Chanacerebi)
+		{
+			
 		}
-	)
-	.Store(x=>"gadatana/" + x.SheetisMisamarti, "Gadatanebi","http://office.anvol.ge:8080","Dokumentebi");
-	(
-		from wb in DirSearch(@"D:\Anvol\modzraobebi\").Where (x => x.ToLower().Contains("gakid")).ToWorkBooks()
-		let pathSegments = wb.Path.Split('\\')
-		from ws  in wb.Worksheets<Worksheet>()
-		let rows = ws.Rng("A1:W1000").ToRows()
-		where rows.Any ()
-		let seg = wb.Path.Split('\\')
-		let sheetisMisamarti = Path.Combine(wb.Path, wb.Name) + "\\" + ws.Name
-		let fileName=Path.GetFileNameWithoutExtension(wb.Name)
-		select new {
-			Mdebareoba = seg[3],
-			Shemskidveli = seg.Length > 5 ? seg[5] : "n/a",
-			SheetisMisamarti = sheetisMisamarti,
-			Dro = DateTimeOffset.Parse(fileName.Substring(fileName.Length-10), new CultureInfo("ka-ge")),
-			Chanacerebi = rows	.Select ((col,i) => new {
-											N=i, 
-											Kodi=col[1].GetString(),
-											Dasakheleba=col[2].GetString(),
-											Ganzomileba=col[3].GetString(),
-											Raodenoba=col[4].GetDouble(),
-											Jami=col[6].GetDecimal(),
-											Dabegvra=col[7].GetString()
-										})
-								.Where (c => c.Kodi != null && c.Raodenoba.HasValue && c.Jami.HasValue)
-		}
-	).Store(x=>"gakidva/" + x.SheetisMisamarti, "Gakidvebi","http://office.anvol.ge:8080","Dokumentebi");
-
+		Add(d.GetType());
+	}
+	
+	public void Handle(Gadaadgileba d)
+	{ 
+		Add(d.GetType());
+	}
+	
+	public void Handle(Cheki d)
+	{ 
+		Add(d.GetType());
+	}
+	
+	public void Handle(Gakidva d)
+	{ 
+		Add(d.GetType());
+	}
+	
+	void Add(Type t){
+		int sum = 0;
+		dic.TryGetValue(t, out sum);
+		sum = sum + 1;
+		dic[t] = sum;
+	}
 }
+
+IEnumerable<T> FromCache<T>(string key)
+{
+	var fileName = key + ".json";
+	using (var stream = File.Open(fileName, FileMode.Open))
+	{
+		return ServiceStack.Text.JsonSerializer.DeserializeFromStream<List<T>>(stream);
+	}
+}
+
+IEnumerable<T> Cache<T>(Func<IEnumerable<T>> src, string key)
+{
+	var fileName = key + ".json";
+	
+	if (!File.Exists(fileName))
+	{
+		using (var stream = File.Open(fileName, FileMode.Create))
+		{
+			var list = new List<T>();
+			list.AddRange(src());
+			ServiceStack.Text.JsonSerializer.SerializeToStream(list, stream);
+			stream.Flush();
+			stream.Close();
+		}
+	}
+	using (var stream = File.Open(fileName, FileMode.Open))
+	{
+		return ServiceStack.Text.JsonSerializer.DeserializeFromStream<List<T>>(stream);
+	}
+}
+
 void Main()
 {
-//StreamDocs("http://arakela:8080/", "movlenebi","Batumi")
-//	.Where (x => x.chekisNomeri != null)
-//	.Where (x => x.chekisNomeri != x.chekisNomeriOld)
-//	.ToList()
-//	.Store(x=>x["@metadata"]["@id"],"movlenebi","http://batumi.anvol.ge:8080/","Pos")
-//	.ToList().Count ().Dump();
-//return;
-//StreamDocs("http://batumi.anvol.ge:8080/", "cheki", "Pos")
-//	.Where(x => int.Parse(x["@metadata"]["@id"].Split('/')[2]) >= 1035)
-//	.ToList()
-//	.Store(x=>x["@metadata"]["@id"],"cheki","http://arakela:8080/","Batumi")
-//	.ToList();
-//return;
-//StreamDocs("http://office.anvol.ge:8080/", "cheki","Batumi")
-//	.Select (x => new {no=int.Parse(x["@metadata"]["@id"].Split('/')[2]), id = x["@metadata"]["@id"], lastModified = x["@metadata"]["Last-Modified"]})
-//	.OrderBy (x => x.no)
-//	.Take(600)
-//	.Dump();
-//
-//StreamDocs("http://batumi.anvol.ge:8080/", "cheki","Pos")
-//	.Select (x => new {no=int.Parse(x["@metadata"]["@id"].Split('/')[2]), id = x["@metadata"]["@id"], lastModified = x["@metadata"]["Last-Modified"]})
-//	.OrderBy (x => x.no)
-//	.Take(600)
-//	.Dump();
-//StreamDocs("http://arakela:8080/", "movlenebi","Batumi")
-//	.Where (x => x.chekisNomeri != null)
-//	.Where (x => x.chekisNomeri != x.chekisNomeriOld)
-//	.Select (x => new {x.chekisNomeri, x.chekisNomeriOld})
-//	.Distinct()
-//	.OrderBy (x => int.Parse(x.chekisNomeri.Substring(2)))
-//	.Dump();
+
+//Migebebi(Chache(() => MomePakingListebi((r,s)=>r),"pakingListebi0").OfType<PakingListi>())
+//		.Select (m =>new {Jami=m.Chanacerebi.Sum (c => c.Jami), m.Dro,m._kursi})
+//		.OrderBy (m => m.Jami)
+//		.Dump();
+//		return;
+//	Chache(() => MomePakingListebi((r,s)=>r),"pakingListebi").Count ().Dump();
+//	Chache(() => MomeGadaadgilebebi((r,s)=>r),"gadaadgilebebi2").Count ().Dump();
+//	Chache(() => MomeGakidvebi((r,s)=>r),"gakidvebi2").Count ().Dump();
+//	Chache(() => MomeChekebi((r,s)=>r),"chekebi3").Count ().Dump();
 //return;
 
-								
-//var cs = //Util.Cache(()=>
-//	StreamDocs("http://batumi.anvol.ge:8080/", "movlenebi", "Pos").ToList()
-//	//,"xxx")
-//	;
-//
-//var xs = cs.Where (c => c.chekisNomeri != null)
-//  .Select (c => new { mid = (string)c["@metadata"]["@id"], order = (int)int.Parse(c["@metadata"]["@id"].Split('/')[2]), ocid = (int)int.Parse(c.chekisNomeri.Split('/')[1])})
-//  .OrderBy (x => x.order)
-//  .ToArray();
-//
-//var mcdic = xs.Skip(1)
-//	.Zip(xs,(x,l) => new {l,x})
-//	.Scan(0, (a,x)=>x.x.ocid<x.l.ocid?x.l.ocid+a:(a+x.l.ocid<x.x.ocid?0:a))
-//	.StartWith(0)
-//	.Zip(xs, (d,x)=> new {x.mid,x.ocid,rez=x.ocid+d,d})
-//	.ToDictionary (x => x.mid);
-//
-//cs.Select (c => {
-//	if(c.chekisNomeri == null){
-//		return c;
-//	}
-//	RavenJObject o = c.Inner; 
-//	if(o.ContainsKey("chekisNomeriOld"))
-//	{
-//		o.Dump();
-//	}
-//	o.Add("chekisNomeriOld",o.Value<string>("chekisNomeri"));
-//	o.Remove("chekisNomeri");
-//	o.Add("chekisNomeri","2/"+mcdic[c["@metadata"]["@id"]].rez);
-//	return c;
-//}).ToList()
-//  .Store(x=>x["@metadata"]["@id"],"movlenebi","http://arakela:8080/","Batumi").ToList()
+
+Func<string,string,string> momeRefi = DaamzadeMomeRefi();
+
+
+
+//LKIENTEBIS SIA
+//StreamQuery("http://office.anvol.ge:8080/","Klientebi2", "Anketebi")
+//	.ToList()
+////	.Where(x => ((IEnumerable<dynamic>)x.bavshvebisDabTarigebi).Any(y=>y.GetType()==typeof(string))).Dump()
+//	.Select (x => new{
+//		  baratisNomeri=x.baratisNomeri
+//		, pid=x.pid
+//		, x.sakheli
+//		, x.gvari
+//		, dabTarigi=x.dabTarigi.ToString("yyyy-MM-dd")
+//		, x.mimdinareProcenti
+//		, x.vizitisRaodenoba
+//		, bavshvebisDabTarigebi= string.Join(",", Enumerable.Select((IEnumerable<dynamic>)x.bavshvebisDabTarigebi, e => e.ToString("yyyy-MM-dd")) )
+//		, mobiluri=Enumerable.Select((IEnumerable<dynamic>)x._anketebi, x_ => x_.mobiluri).FirstOrDefault ()
+//	})
+//	.DumpToExcel("klientebi_"+DateTime.Now.ToString("yyyy.MM.dd"))
 //;
-//
 //return;
 
-//var pakings = Util.Cache(() => 
-//				 PakingLists((r,s)=>r, @"D:\Anvol\Invoicebi\PakingLists" )
-//		.Concat( PakingLists((r,s)=>r, @"D:\Anvol\Invoicebi\PakingLists2") )
-//		.Concat( PakingLists((r,s)=>r, @"D:\Anvol\Invoicebi\PakingLists3") )
-//		.Concat( PakingLists((r,s)=>r, @"D:\Anvol\Invoicebi\PakingLists4") )
-//		.ToList(), "PakingLists");
-//pakings.StoreToEs("jurnali-1", x => "DaemataShekvetisDokumenti").Dump();
+
+var refebi = Cache(() => Refebi(), "ref01");
+//refebi.Select (r => new{ Ref = "'" + r.Id, r.Dasakheleba, r.Fasi })
+//	.Dump();
 //return;
 
-//	var pls = PakingLists((r,s)=>r, @"D:\Anvol\Invoicebi\PakingLists4").ToList();
-//	pls.Store(x=>"pakinglisti/","PakingListi","http://office.anvol.ge:8080/", "Anvol").ToList();
-//
-//	
+//30/05
+//31/05
+//07/06
+
+var shekveta = Cache(() => MomePakingListebi(momeRefi).ToList(), "pl04");
+//shekveta
+//	.Select (s => new {s.Shenishvna,s.Dro,Jami=s.Chanacerebi.Sum (c => c.Jami)})
+//	.OrderBy (x => x.Dro)
+//	.Dump();
 //return;
-//dokumentebisShekmna();
-//return;
-var refebi = Util.Cache(() => Refebi(), "Refebi");
-var refisCvlilebebi = StreamDocs("http://office.anvol.ge:8080/", "movlenebi", "Anvol").Where (x => x.Type == "MienichaRefi")
-	.Select (x => new {x.Ref, x.AkhaliRefi,x.Dasakheleba,Dro=(DateTimeOffset)x["@metadata"]["Last-Modified"]}).Distinct().OrderBy (x => x.Ref)
-	.OrderBy (x => x.Dro)
-	.GroupBy (x => new {x.Ref,x.Dasakheleba})
-	.Select (g => new {g.Key.Ref,g.Key.Dasakheleba,AkhaliRefi=g.OrderByDescending (x => x.Dro).Select (x => x.AkhaliRefi).First ()})
-	.ToList();		
 
-Dictionary<string,string> codebisKenvertori = new Dictionary<string,string>()
-{
-//	{"A16", "A16 (jj8007)"},
-//	{"A30DOUBLE", "A30 Double  (jj8012)"},
-//	{"B18", "B18  (jj8011)"},
-//	{"B28A", "B28A  (jj8013)"},
-//	{"B28B", "B28B(jj8015)"},
-//	{"914-155", "BC914-155"},
-//	{"34043", "34043T"},
-//	{"16174", "16174T"},
-//	{"A0142T", "A0142T5"},
-//	{"51.213", "51.2130"},
-//	{"40.83453", "40.8353"},
-//	{"40.83455", "40.8355"},
-//	{"16100", "16100I"},
-//	{"86420", "86420Z"},
-//	{"13481", "1348I"},
-//	{"110312", "1100312"},
-};
+var migeba = Cache(() => Migebebi(shekveta), "mig01");
 
-Func<string,string,string> momeRefi = null;
-momeRefi = (kodi, dasakheleba) =>
-{
-	var c = refisCvlilebebi.FirstOrDefault (x => x.Ref==kodi && x.Dasakheleba == dasakheleba);
-	
-	var re = (string)(c == null ? kodi : c.AkhaliRefi).ToUpperInvariant().Replace(" ","");
-	if(codebisKenvertori.ContainsKey(re)){
-		return momeRefi(codebisKenvertori[re],dasakheleba);
-	}
-	var rl = re.GetLong();
-	return rl.HasValue ? rl.Value.ToString() : re;
-	
-};
+var chekebi = Cache(() => MomeChekebi(momeRefi).Where (x => !gasaukmebeliChekebi.Contains(x.Nomeri)).ToList(), "ch04");
 
-var gadaadgilebebi = Util.Cache(() => 	(
+var gadaadgilebebi = Cache(() => 	(
 										from l in gamorcheniliGadaadgilebebi.Split('\n').Where (x => x.Length>0)
 										let segs = l.Split(' ').Where (x => x.Length>0).ToArray()
 										select new {f="sackobi",t=segs[0],Kodi=segs[1], Raodenoba=(long?)long.Parse(segs[2]),Dro=DateTime.Parse(segs[3], new CultureInfo("ka-ge")),Dasakheleba=default(string),Jami=default(decimal?)}
 										into r2
 										where r2.Raodenoba.HasValue && r2.Kodi != null
 										group r2 by r2.Dro into g2
-										select new {
+										select new AnonymGadaadgileba{
 													Key=g2.Key.ToString(),
 													Saidan=g2.First ().f,
 													Sad=g2.First ().t,
 													Dro=g2.Key,
-													Chanacerebi=g2.Select (x => new {Ref = momeRefi(x.Kodi, x.Dasakheleba), x.Dasakheleba, x.Raodenoba, Saidan=x.f, Sad=x.t,x.Jami})
+													Chanacerebi=g2.Select (x => new AnonymGadaadgileba.Chanaceri{Ref = momeRefi(x.Kodi, x.Dasakheleba), Dasakheleba=x.Dasakheleba, Raodenoba=x.Raodenoba.Value, Saidan=x.f, Sad=x.t,Jami=x.Jami})
 																.Where (x => !gadaadgilebidanAmosagebi.Contains(x.Ref))
+																.ToList()
 													}
 										
 								).Concat(
@@ -439,76 +266,35 @@ var gadaadgilebebi = Util.Cache(() => 	(
 										into r2
 										where r2.Raodenoba.HasValue && r2.Kodi != null
 										group r2 by r2.Wb into g2
-										select new {
-													g2.Key,
+										select new AnonymGadaadgileba{
+													Key=g2.Key,
 													Saidan=g2.First ().f,
 													Sad=g2.First ().t,
 													Dro=TarigiFailisSakhelidan(g2.Key),
-													Chanacerebi=g2.Select (x => new {Ref = momeRefi(x.Kodi, x.Dasakheleba), x.Dasakheleba, x.Raodenoba, Saidan=x.f, Sad=x.t,x.Jami})
-																.Where (x => !gadaadgilebidanAmosagebi.Contains(x.Ref))
+													Chanacerebi = g2.Select (x => new AnonymGadaadgileba.Chanaceri{Ref = momeRefi(x.Kodi, x.Dasakheleba), Dasakheleba=x.Dasakheleba, Raodenoba=x.Raodenoba.Value, Saidan=x.f, Sad=x.t,Jami=x.Jami})
+																.Where (x => !gadaadgilebidanAmosagebi.Contains(x.Ref) || g2.Key.ToLower().Contains("gakidvebi"))
+																.ToList()
 													}
 								
-								).ToList(), "gadaadgilebebi");
+								).ToList(), "gad06");
 
-//migeba.Select(m => new {
-//					m.Dro, m._kursi, m._kharji,
-//					Filebi = m.Chanacerebi.GroupBy (x => x.Shenishvna)
-//								.Select (g => new {g.Key, Tankha=g.Sum (x => x.Jami)})
-//			})
-//	.OrderBy(m => m.Dro)
-//	.Dump();
-//
-
-var chekebi = Util.Cache(() => {
-							var gamocerilebi = StreamDocs("http://batumi.anvol.ge:8080/", "movlenebi", "Pos")
-                            	.Concat(StreamDocs("http://merani.anvol.ge:8080/", "movlenebi", "Pos"))
-								.Where (x => x.type == "GamoiceraCheki" && x.Dro != null)
-								.Select (x =>  new {chekisNomeri=(string)x.chekisNomeri,dro=(DateTimeOffset)x.Dro})
-								.GroupBy (x => x.chekisNomeri)
-								.ToDictionary (x => x.Key, x=>x.Min (x_ => x_.dro));
-							
-							return (
-							from c in            StreamDocs("http://batumi.anvol.ge:8080/", "cheki", "Pos")
-													.Where(x=>int.Parse(x["@metadata"]["@id"].Split('/')[2])>=1035)
-                                         .Concat(StreamDocs("http://merani.anvol.ge:8080/", "cheki", "Pos"))
-							let chekisNomeri = (string)(c.nomeri == null ? c.posisNomeri + "/" + c.chekisNomrisMrickhveli : c.nomeri)
-							let Dro = (DateTimeOffset)gamocerilebi[chekisNomeri]
-							let Mdebareoba = chekisNomeri.Split('/')[0] == "1" ? "merani" : "batumi"
-							where gamocerilebi.ContainsKey(chekisNomeri)
-							where (Dro >= new DateTime(2013, 07, 11) || Mdebareoba != "merani") && (Dro >= new DateTime(2013, 08, 4) || Mdebareoba != "batumi")
-							select new {
-								Nomeri = chekisNomeri,
-								Mdebareoba,
-								Dro,
-								Gadasakhdeli = (decimal)c.gadasakhdeli.mnishvneloba / 100m,
-								FasdaklebuliGadasakhdeli = (decimal)c.fasdaklebuliGadasakhdeli.mnishvneloba / 100m,
-								gadakhdebi=((IEnumerable<dynamic>)c.gadakhdebi).Select(x => new {forma=(string)x.Key,tankha=(decimal)x.Value.mnishvneloba/100m})
-											.Concat(new []{new {forma="khurda", tankha=-1m*(decimal)c.gasacemi.mnishvneloba/100m}}),
-								Chanacerebi = ((IEnumerable<dynamic>)c.produktebi)
-										.Select (p => new { 
-												Ref = momeRefi((string)p.Key, (string)p.Value.dasakheleba),
-												Dasakheleba=(string)p.Value.dasakheleba,
-												Raodenoba=(double)p.Value.raodenoba.mnishvneloba,
-												Fasi=(decimal)p.Value.fasi.tankha.mnishvneloba / 100m,
-												FasdaklebuliFasi=(decimal)p.Value.fasdaklebuliFasi.tankha.mnishvneloba / 100m,
-												Jami=(decimal)p.Value.jami.mnishvneloba / 100m,
-												FasdaklebuliJami=(decimal)p.Value.fasdaklebuliJami.mnishvneloba / 100m,
-												})
-											
-											}
-							  ).Where (x => !gasaukmebeliChekebi.Contains(x.Nomeri)).ToList();
-
-						}, "Chekebi");
-
-var shekveta = Util.Cache(() => 
-				 PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists" )
-		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists2") )
-		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists3") )
-		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists4") )
-		.ToList(), "PakingLists");
+return;
+//klientebis analizi
+//chekebi.Select (c => new {
+//	c.Mdebareoba,
+//	c.Dro,
+//	c.klientisBaratisNomeri,
+//	c.Gadasakhdeli,
+//	c.FasdaklebuliGadasakhdeli
+//}).Dump();
+//return;
 		
 
-var migeba = Migebebi(shekveta);
+
+//migeba.Select (m => new {m._kursi,m.Dro.Date,Tankha=m.Chanacerebi.Sum (c => c.Jami)})
+//	.OrderBy (m => m.Date)
+//	.Dump();
+//return;
 //migeba.Select (m => new {m.Dro,m._kursi,m._kharji,Jami=m.Chanacerebi.Sum (x => x.Jami)}).OrderBy (x => x.Dro).Dump();
 
 ////problemuri refebi
@@ -533,18 +319,155 @@ var migeba = Migebebi(shekveta);
 //return;
 
 
+//var bananasKodebi = shekveta.Where (s => s.Shenishvna == @"D:\Anvol\Invoicebi\PakingLists\banana-unimart zeddebuli 26.02.2013.xls\Grid")
+//	.SelectMany (x => x.Chanacerebi.Select (c=>c.Ref))
+//	.ToList()
+//	;
+//chekebi.SelectMany (c => c.Chanacerebi.Select (ch => new {Ref=(string)ch.Ref,Raodenoba=(double)ch.Raodenoba,Jami=(decimal)ch.FasdaklebuliJami,Dro=c.Dro.DateTime}))
+//	.Where(x=>bananasKodebi.Contains(x.Ref))
+//.Concat(
+//gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))
+//	.SelectMany (c => c.Chanacerebi.Select (ch => new {Ref=(string)ch.Ref,Raodenoba=(double)ch.Raodenoba,Jami=ch.Jami.Value,c.Dro}))
+//	.Where(x=>bananasKodebi.Contains(x.Ref))
+//	).Dump();
+//	
+//return;
 
+////gdaaadgilebebi plius gakidvebi
+//gadaadgilebebi
+//	.Select (x => new {x.Key, x.Dro, x.Saidan, x.Sad, Tankha=x.Chanacerebi.Sum(z=>z.Jami)})
+//	.OrderBy (x => x.Dro)
+//	.GroupBy (x => x.Dro.Year*100+x.Dro.Month)
+//	.Dump();
+//return;
+
+////refit baratiani chekis modzebna
 //chekebi
-//	.SelectMany (cheki => cheki.gadakhdebi
-//								.Select (g => new {Dro=cheki.Dro.LocalDateTime,cheki.Mdebareoba,g.forma,g.tankha,Shenishvna=(string)cheki.Nomeri})
+//.Where (c => c.klientisBaratisNomeri != null)
+//.Where (c => c.Chanacerebi.Any (ch => ch.Ref.EndsWith("8811-0")))
+//.Take(10).Dump();
+//return;
+
+//////REALIZACIA
+//
+//chekebi
+//	.SelectMany (cheki => 
+//		cheki.gadakhdebi.Select (g => new {Dro=cheki.Dro,cheki.Mdebareoba,g.forma,g.tankha,Shenishvna=(string)cheki.Nomeri})
 //				)
 //.Concat(
-//	gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))	
-//		.Select (x => new {x.Dro, Mdebareoba=x.Saidan, forma="n/a", tankha = x.Chanacerebi.Sum (c => c.Jami.Value), Shenishvna=(string)x.Key})
+//		gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))	
+//			.Select (x => new {x.Dro, Mdebareoba=x.Saidan, forma="n/a", tankha = x.Chanacerebi.Sum (c => c.Jami.Value), Shenishvna=(string)x.Key})
 //	)
 //	.Select (g => new {Tve = g.Dro.Year * 100 + g.Dro.Month, Dge = g.Dro.Date, g.Dro, g.Mdebareoba, g.forma, Tankha = g.tankha, g.Shenishvna })
-//	.Dump();
-////return;
+//	.DumpToExcel("Realizacia_"+DateTime.Today.ToString("yyyy.MM.dd"));
+
+
+//var yvelaCiknisRefi = shekveta.Where (s => s.Shenishvna==@"D:\Anvol\Invoicebi\PakingLists\Paking წიგნები ქართული 30.05.2013.xlsx\Sheet1" || s.Shenishvna == @"D:\Anvol\Invoicebi\PakingLists\Paking წიგნები რუსული 31.05.2013.xlsx\Sheet1")
+//	.SelectMany (s => s.Chanacerebi.Select (c => c.Ref))
+//	.Distinct()
+//	.ToList();
+//var diplomatisBaratebi = new []{"001686","004999","000265"}.ToList();
+//
+//chekebi
+//	.SelectMany (cheki => 
+//		cheki.Chanacerebi.Select (c => new {cheki.Dro, cheki.Mdebareoba, Tankha=c.FasdaklebuliFasi,Diplomati=diplomatisBaratebi.Contains(cheki.klientisBaratisNomeri)?"diplomati":"",VATisGareshe=yvelaCiknisRefi.Contains(c.Ref)?"cigni":""})
+//				)
+//.Concat(
+//		gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))	
+//			.SelectMany (x => 
+//				x.Chanacerebi.Select(c => new {x.Dro, Mdebareoba=x.Saidan, Tankha = c.Jami.Value, Diplomati="",VATisGareshe=yvelaCiknisRefi.Contains(c.Ref)?"cigni":""})
+//			)
+//	).Where(x=>!string.IsNullOrWhiteSpace(x.Diplomati) || !string.IsNullOrWhiteSpace(x.VATisGareshe))
+//.DumpToExcel("Realizacia_Diplomati_VAT"+DateTime.Today.ToString("yyyy.MM.dd"));
+//
+//return;
+//	
+//return;
+var refDict = refebi.GroupBy (r => momeRefi(r.Id, r.Dasakheleba)).ToDictionary (g => g.Key, g=>g.First ());
+
+
+////BrendebisReporti
+//var realizaciisChanacerebi = (
+//				from d in chekebi
+//				from c in d.Chanacerebi
+//				select new {d.Dro, d.Mdebareoba,c.Ref,c.Raodenoba,Tankha=c.FasdaklebuliFasi}
+//			).Concat(
+//				from d in gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))
+//				from c in d.Chanacerebi
+//				select new {d.Dro, Mdebareoba=d.Saidan, c.Ref,Raodenoba=(double)c.Raodenoba,Tankha=c.Jami.Value}
+//			).ToList();
+//var brandisReportisChanacerebi = (
+//	from c in realizaciisChanacerebi
+//	let Dasakheleba = (refDict.ContainsKey(c.Ref) ? refDict[c.Ref].Dasakheleba ?? "N/A" : "N/A").ToUpperInvariant().Trim()
+//	let segmentebi = Dasakheleba.Split(' ')
+//	select new {
+//		Periodi = c.Dro.Year * 100 + c.Dro.Month,
+//		c.Mdebareoba,
+//		c.Ref,
+//		Dasakheleba=Dasakheleba + ":" + c.Ref, 
+//		Brendi = string.Join(" ", segmentebi.Take(1)),
+//		KveBrendi = string.Join(" ",segmentebi.Take(2)),
+//		c.Raodenoba,
+//		c.Tankha,
+//	}
+//).ToList();
+//
+//var realizaciaPeriodebisMikhedvit = brandisReportisChanacerebi.GroupBy (x => x.Periodi).ToDictionary (x => x.Key,x=>x.Sum (x_ => x_.Tankha));
+//var reports = (
+//	(
+//		from c in brandisReportisChanacerebi
+//		group c by new {c.Periodi,c.Mdebareoba} into g
+//		let Tankha = g.Sum (x => x.Tankha)
+//		select new {g.Key.Periodi, Sheet="Stock",Value=g.Key.Mdebareoba, Tankha, Procenti= Tankha / realizaciaPeriodebisMikhedvit[g.Key.Periodi]}
+//	).GroupBy (x => x.Periodi).SelectMany (g => g.OrderByDescending (x => x.Tankha))
+//).Concat(
+//	(
+//		from c in brandisReportisChanacerebi
+//		group c by new {c.Periodi,c.Brendi} into g
+//		let Tankha = g.Sum (x => x.Tankha)
+//		select new {g.Key.Periodi, Sheet="BrendiTop30", Value=g.Key.Brendi, Tankha, Procenti= Tankha / realizaciaPeriodebisMikhedvit[g.Key.Periodi]}
+//	).GroupBy (x => x.Periodi).SelectMany (g => g.OrderByDescending (x => x.Tankha).Take(30))
+//).Concat(
+//	(
+//		from c in brandisReportisChanacerebi
+//		group c by new {c.Periodi,c.KveBrendi} into g
+//		let Tankha = g.Sum (x => x.Tankha)
+//		select new {g.Key.Periodi, Sheet="KveBrendiTop50", Value=g.Key.KveBrendi, Tankha, Procenti= Tankha / realizaciaPeriodebisMikhedvit[g.Key.Periodi]}
+//	).GroupBy (x => x.Periodi).SelectMany (g => g.OrderByDescending (x => x.Tankha).Take(50))
+//)
+//.Concat(
+//	(
+//		from c in brandisReportisChanacerebi
+//		group c by new {c.Periodi,c.Dasakheleba} into g
+//		let Tankha = g.Sum (x => x.Tankha)
+//		select new {g.Key.Periodi, Sheet="ArtikuliTop50", Value=g.Key.Dasakheleba, Tankha, Procenti= Tankha / realizaciaPeriodebisMikhedvit[g.Key.Periodi]}
+//	).GroupBy (x => x.Periodi).SelectMany (g => g.OrderByDescending (x => x.Tankha).Take(50))
+//).ToList();
+//foreach (var report in reports.GroupBy (x => x.Periodi))
+//{
+//	report.ToList().DumpToExcel("brendisReporti"+report.Key, x => x.Sheet);
+//}
+//
+//return;
+
+//
+//
+//var gakidvebi2 = (from cheki in gadaadgilebebi.Where (x => x.Sad.ToLower().StartsWith("gak"))
+// from cha in cheki.Chanacerebi
+// select new {cha.Ref,Periodi=cheki.Dro.Year*100+cheki.Dro.Month,Mdebareoba=cheki.Saidan,Tankha=cha.Jami.Value}
+//).Concat
+//(from cheki in chekebi
+// from cha in cheki.Chanacerebi
+// select new {cha.Ref,Periodi=cheki.Dro.Year*100+cheki.Dro.Month,Mdebareoba=cheki.Mdebareoba,Tankha=cha.FasdaklebuliJami}
+//);
+//(from ga in gakidvebi2
+// group ga by new {ga.Ref,Periodi=ga.Periodi,ga.Mdebareoba} into g
+// let Dasakheleba = refDict[g.Key.Ref].Dasakheleba
+// let seg =  (Dasakheleba ?? "N/A").Split(' ')
+// select new { g.Key.Periodi, g.Key.Mdebareoba, Ref=Dasakheleba+"; "+g.Key.Ref, Brendi = seg.FirstOrDefault(), KveBrendi = string.Join(" ", seg.Take(2)), Dasakheleba, Tankha = g.Sum (x => x.Tankha)}
+//).Dump();
+//return;
+
 
 //return;
 
@@ -569,7 +492,8 @@ var migeba = Migebebi(shekveta);
 //.GroupBy (x => x.Dro.Year*100 + x.Dro.Month)
 //.Dump();
 //return;
-
+//6019675;49492
+//return;
 migeba.SelectMany (m => m.Chanacerebi.Select (c => new {
 	f="sheskidvebi",
 	t="sackobi",
@@ -592,10 +516,10 @@ migeba.SelectMany (m => m.Chanacerebi.Select (c => new {
 	c.Shenishvna
 })).Concat(
 gadaadgilebebi.SelectMany (g => g.Chanacerebi.Select (c => new{
-	f=c.Saidan.ToLower(),
-	t=c.Sad.ToLower(),
+	f=c.Raodenoba>0.0?c.Saidan.ToLower():c.Sad.ToLower(),
+	t=c.Raodenoba>0.0?c.Sad.ToLower():c.Saidan.ToLower(),
 	Ref=c.Ref.Trim(),
-	Raodenoba=(double)c.Raodenoba.Value,
+	Raodenoba=(double)(c.Raodenoba>0?c.Raodenoba:c.Raodenoba * -1),
 	Jami=0m,
 	g.Dro,
 	rigi=2,
@@ -607,13 +531,11 @@ chekebi.SelectMany (ch => ch.Chanacerebi.Select (c => new {
 	Ref=(string)c.Ref.Trim(),
 	Raodenoba=(double)c.Raodenoba,
 	Jami=0m,
-	Dro=(DateTime)ch.Dro.DateTime,
+	Dro=ch.Dro,
 	rigi=3,
 	Shenishvna = ch.Nomeri,
 }))
 ))
-//.Where   (x => x.Dro < new DateTime(2013,9,1) )
-//.Where (x => x.Ref=="A0002")
 .OrderBy (x => x.rigi)
 .OrderBy (x => x.Dro)
 .GroupBy (x => x.Ref)
@@ -626,8 +548,14 @@ chekebi.SelectMany (ch => ch.Chanacerebi.Select (c => new {
 						tg.Daamate(x.t, x.Raodenoba, x.Jami);
 						return new { x.f, x.t, x.Ref, Raodenoba=x.Raodenoba, Jami=x.Jami, Dro=x.Dro, nastebi=tg.DumpSackobisNashtebi(), Shenishvna=x.Shenishvna};
 					} else {
-					
+						try{
+							tg.MomeGirebuleba(x.f, x.Raodenoba);
+						}
+						catch{
+							new {tg,x.f, x.Raodenoba}.Dump();
+						}
 						var girebuleba = tg.MomeGirebuleba(x.f, x.Raodenoba);
+						
 						tg.Moakeli(x.f, x.Raodenoba, girebuleba);
 						tg.Daamate(x.t, x.Raodenoba, girebuleba);
 						
@@ -638,7 +566,11 @@ chekebi.SelectMany (ch => ch.Chanacerebi.Select (c => new {
 		)
 .SelectMany (g => g)
 .ToList();
+//moves.Where (m => m.Ref.EndsWith("3654")).Dump();
+//return;
 
+//refebi.Where (r => r.Id.Contains("150")).Dump();
+//return;
 //.Dump()
 
 //moves.GroupBy (m => m.Ref)
@@ -666,21 +598,30 @@ chekebi.SelectMany (ch => ch.Chanacerebi.Select (c => new {
 //return;
 
 
-var dt = DateTime.Today;
+var dt = //DateTime.Parse("2014-01-01")
+		 DateTime.Today
+		 ;
 
-var gatarebebi = 	
+var gatarebebi2 = 	
     moves.Select (m => new {l=m.f,Ref="'"+m.Ref,Raodenoba=m.Raodenoba*-1, Tankha=m.Jami*-1, m.Dro})
 .Concat(
 	moves.Select (m => new {l=m.t,Ref="'"+m.Ref,m.Raodenoba, Tankha=m.Jami, m.Dro})
-).Where (x => x.Dro < dt)
-//.GroupBy (m => new {m.l, Periodi = m.Dro.Year * 100 + m.Dro.Month})
-//.Select (g => new{ g.Key.l, g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba),Tankha=g.Sum (x => x.Tankha)}).Dump()
-.GroupBy (x => new {x.l, x.Ref, Periodi=x.Dro.Year*100+x.Dro.Month})
-.Select (g => new {g.Key.l, g.Key.Ref,g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)})
-;
+).Where (x => x.Dro < dt);
 
-var refDict = refebi.GroupBy (r => momeRefi(r.Id, r.Dasakheleba)).ToDictionary (g => g.Key, g=>g.First ());
-Util.WriteCsv(
+var gatarebebi=
+	gatarebebi2
+	.GroupBy (x => new {x.l, x.Ref, Periodi=x.Dro.Year*100+x.Dro.Month})
+	.Select (g => new {g.Key.l, g.Key.Ref,g.Key.Periodi, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)});
+gatarebebi.DumpToExcel("Tvitgirebuleba_"+DateTime.Today.ToString("yyyy.MM.dd"));
+return;
+////NASHTI TVITGIREBULEBIT
+//gatarebebi2
+//.GroupBy (m => new {m.l, Periodi = m.Dro.Year * 100 + m.Dro.Month, m.Dro.Date})
+//.Select (g => new{ g.Key.l, g.Key.Periodi,g.Key.Date, Raodenoba=g.Sum (x => x.Raodenoba),Tankha=g.Sum (x => x.Tankha)})
+//.Dump();
+//return;
+
+(
 	(
 		from r in gatarebebi
 		select new {r.Ref,r.Periodi,l=r.l+" stock (qty)",value=r.Raodenoba}
@@ -701,8 +642,10 @@ Util.WriteCsv(
 		.Select (g => new {g.Key.Ref,g.Key.Periodi,g.Key.l, value = g.Sum (x => x.value)})
 	
 	).Select (wc => {
-		var l  = wc.l.Replace("gakidvebi/batumi", "batumi sales")
+		var l  = wc.l
+					.Replace("gakidvebi/batumi", "batumi sales")
 					.Replace("gakidvebi/merani", "merani sales")
+					.Replace("gakidvebi/mall", "mall sales")
 					
 					.Replace("gakidvebi stock (qty)", "warehouse sales stock (qty)")
 					.Replace("gakidvebi stock (purch. price)", "warehouse sales stock (purch. price)")
@@ -712,13 +655,28 @@ Util.WriteCsv(
 					.Replace("sheskidvebi stock (purch. price)", "total purchase stock (purch. price)")
 					.Replace("sheskidvebi stock (qty)", "total purchase stock (qty)")
 					;
-		Refi re = null;
-		refDict.TryGetValue(wc.Ref.Substring(1),out re);
+		
+		
+		var mosadzebni = wc.Ref.Substring(1);
+		
+		var re = Enumerable
+		.Range(0,12)
+		.Select(i=>{
+			Refi r0 = null;
+			refDict.TryGetValue(mosadzebni.PadLeft(i, '0'), out r0);
+			return r0;
+		}).FirstOrDefault (refi => refi != null);
+		
+		
+		if(re == null) {
+		}
 		return new {wc.Ref,Dasakheleba=re==null?"":re.Dasakheleba,Ean="'"+(re==null?"":string.Join(";",re.Eans)),wc.Periodi,l,wc.value};
-	})
-, @"d:\anvol\nashtebi" + dt.ToString("yyyy-MM-dd") + ".csv")
-;
-return;
+	}
+)
+).DumpToExcel("Nashtebi_"+DateTime.Today.ToString("yyyy.MM.dd"));
+
+
+//return;
 //(
 //
 //from x in gatarebebi
@@ -907,7 +865,7 @@ IEnumerable<string> DirSearch(string sDir, string searchPattern="*.xls")
 			yield return file;
 		}
 		foreach(var dir in Directory.GetDirectories(sDir)) {
-			foreach(var file in DirSearch(dir)){
+			foreach(var file in DirSearch(dir, searchPattern)){
 				yield return file;
 			}
 		}
@@ -1061,16 +1019,7 @@ static Func<string,IEnumerable<string>> toEans = s=> (s??string.Empty).Replace("
 				.Select ( ean => new string( ean.Where(char.IsNumber).ToArray() ) )
 				.Where  ( ean => ean.GetLong().HasValue )
 				.ToArray();
-static IEnumerable<Tuple<List<string>, decimal, decimal>> migebebiDic = new List<Tuple<List<string>,decimal,decimal>>()
-{
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132456 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132469 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132473 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132497 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132498 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132499 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132551 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132578 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132579 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132671 Mattel 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132735 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132804 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0813U 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0913U 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Pasking list for inv.132810 23.05.2013.xls\Hansa Report"}, 330.97m, 2.1153m),
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132457 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132466 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132475 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132493 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132739 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0713U 23.05.2013.xls\Hansa Report"},412.00m,1.636m),
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133638 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133644 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133645 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133765 Mattel 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133807 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv.134171 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv.134172 28.07.2013.xls\Hansa Report"},4181.75m,2.1948m),
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133666 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133667 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133808 28.07.2013.xls\Hansa Report"},1442.53m,1.6546m),
-	
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists4\dolar invoicebi gaertinebuli18.10.2013.xlsx\Sheet1"}, 3377.43m, 1.6651m),
-	Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists4\EURO INVOICEBI GAERTIENBULI18.10.2013.xlsx\Sheet1"}, 7579.41m, 2.2555m),
-};
+
 
 static List<string> gadaadgilebidanAmosagebi = @"
 18-43200 
@@ -1152,6 +1101,7 @@ static List<string> gasaukmebeliChekebi = @"
 1/1822
 2/10074
 1/3099
+3/61
 "   .Split('\n')
 	.Where (x => x.Length > 0)
 	.ToList();
@@ -1397,3 +1347,256 @@ merani  56057  1  2013.09.15
 batumi  6F22REL/1BP  1  2013.10.08 
 merani  6F22REL/1BP  1  2013.10.11 
 ";
+
+
+IEnumerable<PakingListi> MomePakingListebi(Func<string,string,string> momeRefi)
+{
+	return       PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists" )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists2") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists3") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists4") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists5") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists6") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists7") )
+		.Concat( PakingLists(momeRefi, @"D:\Anvol\Invoicebi\PakingLists8") )
+		.ToList();
+}
+IEnumerable<Gadaadgileba> MomeGadaadgilebebi(Func<string,string,string> momeRefi)
+{
+	return (
+		from wb  in DirSearch(@"D:\Anvol\modzraobebi\").Where (x => !x.ToLower().Contains("\\gakidvebi\\")).ToWorkBooks()
+		let pathSegments = wb.Path.Split('\\')
+		from ws  in wb.Worksheets<Worksheet>()
+		from r in ws.Rng("A1:W10000").ToRows()
+		select new { Wb = wb.Path + "\\" + wb.Name + "\\" + ws.Name, f=pathSegments[3],t=pathSegments[4], Id=r[0].GetLong(), Kodi=r[1].GetString(), Dasakheleba=r[2].GetString(), Raodenoba=r[4].GetLong(),ErtFasi=r[5].GetDecimal(),Jami=r[6].GetDecimal()} 
+		into r2
+		where r2.Raodenoba.HasValue && r2.Kodi != null
+		group r2 by r2.Wb into g2
+		select new Gadaadgileba{
+					Key=g2.Key,
+					Saidan=g2.First ().f,
+					Sad=g2.First ().t,
+					Dro=TarigiFailisSakhelidan(g2.Key),
+					Chanacerebi=g2.Select (x => new Gadaadgileba.Chanaceri{
+						Ref = momeRefi(x.Kodi, x.Dasakheleba), 
+						Dasakheleba=x.Dasakheleba, 
+						Raodenoba=(double)x.Raodenoba.Value
+						})
+							.ToList()
+					}
+	
+	).ToList();
+}
+IEnumerable<Cheki> MomeChekebi(Func<string,string,string> momeRefi)
+{
+							var posebi = new Dictionary<string,string>{
+								{"1", "merani"},
+								{"2", "batumi"},
+								{"3", "mall"},
+								{"4", "mall"},
+							};
+							var gamocerilebi = 
+							            StreamDocs("http://batumi.anvol.ge:8080/", "movlenebi", "Pos")
+                            	.Concat(StreamDocs("http://merani.anvol.ge:8080/", "movlenebi", "Pos"))
+								.Concat(StreamDocs("http://mall1.anvol.ge:8080/", "movlenebi", "Pos"))
+								.Concat(StreamDocs("http://mall2.anvol.ge:8080/", "movlenebi", "Pos"))
+
+								.Where (x => x.type == "GamoiceraCheki" && x.Dro != null)
+								.Select (x =>  new {chekisNomeri=(string)x.chekisNomeri,dro=(DateTimeOffset)x.Dro})
+								.GroupBy (x => x.chekisNomeri)
+								.ToDictionary (x => x.Key, x=>x.Min (x_ => x_.dro));
+							
+							return (
+							from c in            StreamDocs("http://batumi.anvol.ge:8080/", "cheki", "Pos")
+													.Where(x => int.Parse(x["@metadata"]["@id"].Split('/')[2])>=1035)
+                                         .Concat(StreamDocs("http://merani.anvol.ge:8080/", "cheki", "Pos"))
+                                         .Concat(StreamDocs("http://mall1.anvol.ge:8080/", "cheki", "Pos"))
+                                         .Concat(StreamDocs("http://mall2.anvol.ge:8080/", "cheki", "Pos"))
+										 
+							let chekisNomeri = (string)(c.nomeri == null ? c.posisNomeri + "/" + c.chekisNomrisMrickhveli : c.nomeri)
+							let Dro = (DateTimeOffset)gamocerilebi[chekisNomeri]
+							let posisNomeri = chekisNomeri.Split('/')[0] 
+							let Mdebareoba = posebi[posisNomeri]
+							where gamocerilebi.ContainsKey(chekisNomeri)
+							where (Dro >= new DateTime(2013, 07, 11) || Mdebareoba != "merani") && 
+							      (Dro >= new DateTime(2013, 08, 4) || Mdebareoba != "batumi") &&
+								  (Dro >= new DateTime(2013, 12, 1) || Mdebareoba != "mall")
+							select new Nashti.Core.Cheki {
+								Nomeri = chekisNomeri,
+								Mdebareoba=Mdebareoba,
+								Dro = Dro.DateTime,
+								klientisBaratisNomeri= c.klientisBaratisNomeri,
+								Gadasakhdeli = (decimal)c.gadasakhdeli.mnishvneloba / 100m,
+								FasdaklebuliGadasakhdeli = (decimal)c.fasdaklebuliGadasakhdeli.mnishvneloba / 100m,
+								gadakhdebi=((IEnumerable<dynamic>)c.gadakhdebi).Select(x => new Cheki.Gadakhda{forma=(string)x.Key,tankha=(decimal)x.Value.mnishvneloba/100m})
+											.Concat(new []{new Cheki.Gadakhda {forma="khurda", tankha=-1m*(decimal)c.gasacemi.mnishvneloba/100m}}).ToList(),
+								Chanacerebi = ((IEnumerable<dynamic>)c.produktebi)
+										.Select (p => new Cheki.Chanaceri { 
+												Ref = momeRefi((string)p.Key, (string)p.Value.dasakheleba),
+												Dasakheleba=(string)p.Value.dasakheleba,
+												Raodenoba=(double)p.Value.raodenoba.mnishvneloba,
+												Fasi=(decimal)p.Value.fasi.tankha.mnishvneloba / 100m,
+												FasdaklebuliFasi=(decimal)p.Value.fasdaklebuliFasi.tankha.mnishvneloba / 100m,
+												Jami=(decimal)p.Value.jami.mnishvneloba / 100m,
+												FasdaklebuliJami=(decimal)p.Value.fasdaklebuliJami.mnishvneloba / 100m,
+												}).ToList()
+											
+											}
+							  ).ToList();
+}
+
+IEnumerable<Gakidva> MomeGakidvebi(Func<string,string,string> momeRefi)
+{
+
+	return (
+		from wb in DirSearch(@"D:\Anvol\modzraobebi\").Where (x => x.ToLower().Contains("\\gakidvebi\\")).ToWorkBooks()
+		let pathSegments = wb.Path.Split('\\')
+		from ws  in wb.Worksheets<Worksheet>()
+		from r in ws.Rng("A1:W10000").ToRows()
+		select new { Wb = wb.Path + "\\" + wb.Name + "\\" + ws.Name, f=pathSegments[3],t=pathSegments[4], Id=r[0].GetLong(), Kodi=r[1].GetString(), Dasakheleba=r[2].GetString(), Raodenoba=r[4].GetLong(),ErtFasi=r[5].GetDecimal(),Jami=r[6].GetDecimal()} 
+		into r2
+		where r2.Raodenoba.HasValue && r2.Kodi != null && r2.Jami.HasValue
+		group r2 by r2.Wb into g2
+		select new Gakidva {
+				Key=g2.Key,
+				Mdebareoba=g2.First ().f,
+				Dro=TarigiFailisSakhelidan(g2.Key),
+				Chanacerebi= g2.Select (x => new Gakidva.Chanaceri{
+								Ref = momeRefi(x.Kodi, x.Dasakheleba), 
+								Dasakheleba=x.Dasakheleba, 
+								Raodenoba=(double)x.Raodenoba.Value, 
+								Jami=(decimal)x.Jami.Value
+							}).ToList()
+			}
+		).ToList();
+}
+
+IEnumerable<Migeba> Migebebi(IEnumerable<PakingListi> shekveta)
+{
+	var  migebebiDic = new List<Tuple<List<string>,decimal,decimal>>()
+	{
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132456 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132469 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132473 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132497 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132498 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132499 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132551 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132578 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132579 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132671 Mattel 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132735 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132804 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0813U 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0913U 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Pasking list for inv.132810 23.05.2013.xls\Hansa Report"}, 330.97m, 2.1153m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132457 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132466 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132475 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132493 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list for inv.132739 23.05.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists\Packing list Invoice nr 0713U 23.05.2013.xls\Hansa Report"},412.00m,1.636m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133638 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133644 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133645 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133765 Mattel 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133807 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv.134171 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv.134172 28.07.2013.xls\Hansa Report"},4181.75m,2.1948m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133666 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133667 28.07.2013.xls\Hansa Report", @"D:\Anvol\Invoicebi\PakingLists2\Packing list for inv 133808 28.07.2013.xls\Hansa Report"},1442.53m,1.6546m),
+		
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists4\dolar invoicebi gaertinebuli18.10.2013.xlsx\Sheet1"}, 3377.43m, 1.6651m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists4\EURO INVOICEBI GAERTIENBULI18.10.2013.xlsx\Sheet1"}, 6844.20m, 2.2555m),
+		
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists5\gaertianebuli evro 22.11.2013.xlsx\Sheet1"}, 449.00m, 2.2519m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists5\gaertianebuli dolari 22.11.2013.xlsx\Sheet1"}, 400.00m, 1.6758m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists6\gaertianebuli dolari 25.11.2013.xlsx\Sheet1"}, 1553.96m, 1.6821m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists6\gaertinebuli evro 25.11.2013.xlsx\Sheet1"}, 7481.68m, 2.2732m),
+		Tuple.Create(new List<string>{@"D:\Anvol\Invoicebi\PakingLists7\2013 11 20 Specification GE 04.12.2013.xlsx\Specyfikacja załadunku"}, 5300m*2.3055m+400, 2.3055m),
+	};
+	var ertadGanbajebuli = migebebiDic.SelectMany(x => x.Item1).ToList();
+	return migebebiDic.Concat(
+			shekveta.Where (s => !ertadGanbajebuli.Contains(s.Shenishvna))
+					.Select (s => Tuple.Create(new List<string>{s.Shenishvna},0m,1m))
+			).Select (x => new {p1=x.Item1.SelectMany (i => shekveta.Where (s => s.Shenishvna==i)),p2=x.Item2,p3=x.Item3})
+			.Where (x => x.p1.Any ())
+			.Select (x => new Migeba(x.p1, x.p2, x.p3))
+			;
+}
+
+IEnumerable<PakingListi> PakingLists(Func<string,string,string> momeRefi,string path=@"D:\Anvol\Invoicebi\PakingLists")
+{
+	var valutebi = (
+		from wb  in DirSearch(path).ToWorkBooks()
+		from ws  in wb.Worksheets<Worksheet>()
+		let r = ws.Rng("A1:W20").ToRows().SelectMany (x => x).Select (x => x.GetString()).Where (x => !string.IsNullOrWhiteSpace(x)).Select (x => x.ToUpper()).ToList()
+		where r.Count > 3
+		select new {Wb = wb.Path + "\\" + wb.Name+"\\"+ ws.Name, Eur = r.Any(x=> x.Contains("EUR")), Usd = r.Any(x=>x.Contains("USD")) }
+	).ToList();
+	
+	if(valutebi.Any (v => v.Eur && v.Usd)){
+		throw new InvalidOperationException("ver dadginda Valuta");
+	}
+	var valutebiDic = valutebi.ToDictionary (x => x.Wb,x => x.Eur ? "EUR" : x.Usd ? "USD" : "GEL");
+	var q1 = (
+		from wb  in DirSearch(path).ToWorkBooks()
+		from ws  in wb.Worksheets<Worksheet>()
+		from r in ws.Rng("A1:W10000").ToRows()
+		select new {Wb = wb.Path + "\\" + wb.Name+"\\"+ ws.Name, SheetName = ws.Name, A=r[0].GetString(), B=r[1].GetString(), C=r[2].GetString(), D=r[3].GetDouble(), E=r[4].GetDecimal(), F=r[5].GetDecimal(), G=r[6], H=r[7], I=r[8], J=r[9].GetDouble(), K=r[10], L=r[11], M=r[12], N=r[13], O=r[14], P=r[15], Q=r[16], R=r[17], S=r[18], T=r[19], U=r[20],V=r[21],W=r[22] }
+	)
+	.Where (x => x.D.HasValue && x.E.HasValue && x.F.HasValue && x.D.Value > 0);
+	return (
+		from x in q1
+		group x by x.Wb into g
+		select new PakingListi {
+				Id=Hash(g.Key),
+				Shenishvna=g.Key,
+				Dro = TarigiFailisSakhelidan(g.Key),
+				Valuta = valutebiDic[g.Key],
+				Chanacerebi = g.Select ((x,i) => new PakingListi.Chanaceri(
+				momeRefi(x.A, x.B),x.D.Value,i.ToString(),null,x.C,x.B,x.E.Value,Math.Round(x.F.Value,2),x.J
+				)).ToList()
+			}
+	);
+}
+
+Func<string,string,string> DaamzadeMomeRefi()
+{
+	var refisCvlilebebi = StreamDocs("http://office.anvol.ge:8080/", "movlenebi", "Anvol").Where (x => x.Type == "MienichaRefi")
+			.Select (x => new {x.Ref, x.AkhaliRefi,x.Dasakheleba,Dro=(DateTimeOffset)x["@metadata"]["Last-Modified"]}).Distinct().OrderBy (x => x.Ref)
+			.OrderBy (x => x.Dro)
+			.GroupBy (x => new {x.Ref,x.Dasakheleba})
+			.Select (g => new {g.Key.Ref,g.Key.Dasakheleba,AkhaliRefi=g.OrderByDescending (x => x.Dro).Select (x => x.AkhaliRefi).First ()})
+			.ToList();		
+	Dictionary<string,string> codebisKenvertori = new Dictionary<string,string>()
+	{
+		//	{"A16", "A16 (jj8007)"},
+		//	{"A30DOUBLE", "A30 Double  (jj8012)"},
+		//	{"B18", "B18  (jj8011)"},
+		//	{"B28A", "B28A  (jj8013)"},
+		//	{"B28B", "B28B(jj8015)"},
+		//	{"914-155", "BC914-155"},
+		//	{"34043", "34043T"},
+		//	{"16174", "16174T"},
+		//	{"A0142T", "A0142T5"},
+		//	{"51.213", "51.2130"},
+		//	{"40.83453", "40.8353"},
+		//	{"40.83455", "40.8355"},
+		//	{"16100", "16100I"},
+		//	{"86420", "86420Z"},
+		//	{"13481", "1348I"},
+		//	{"110312", "1100312"},
+	};
+	
+	Func<string,string,string> momeRefi = null;
+	momeRefi = (kodi, dasakheleba) =>
+	{
+		var c = refisCvlilebebi.FirstOrDefault (x => x.Ref==kodi && x.Dasakheleba == dasakheleba);
+		
+		var re = (string)(c == null ? kodi : c.AkhaliRefi).ToUpperInvariant().Replace(" ","");
+		if(codebisKenvertori.ContainsKey(re)){
+			return momeRefi(codebisKenvertori[re],dasakheleba);
+		}
+		var rl = re.GetLong();
+		return rl.HasValue ? rl.Value.ToString() : re;
+	};
+	return momeRefi;
+}
+
+
+public static class EnumerableEx
+{
+	public static void DumpToExcel<T>(this IEnumerable<T> src, string wbName, Func<T,string> bySheets=null)
+	{
+		ExcelPackage pck = new ExcelPackage();
+		var sheets = bySheets!=null
+			? src.GroupBy (x => bySheets(x)).Select (g => new {sheetName=g.Key, data=g.ToList()})
+			: new[]{new {sheetName="data", data=src.ToList()}};
+		foreach (var sheet in sheets)
+		{
+			var wsEnum = pck.Workbook.Worksheets.Add(sheet.sheetName);
+			wsEnum.Cells["A1"].LoadFromCollection(sheet.data, true, OfficeOpenXml.Table.TableStyles.Medium9);
+			wsEnum.Cells[wsEnum.Dimension.Address].AutoFitColumns();
+		}	
+		var fileName = @"d:\anvol\"+wbName+".xlsx";
+		File.Delete(fileName);
+		pck.SaveAs(new FileInfo(fileName));
+		Process.Start(fileName);
+	}
+
+}
