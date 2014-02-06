@@ -65,7 +65,7 @@ void ganckhadebisMisamartisKorektireba(SqlConnection conn, string piradiNomeri, 
 
 void Main()
 {
-	var r = daakorektire("41001018222").Result;
+	var r = daakorektire("20850007176").Result;
 	string.Join(", ", r.Values)	.Dump();
 	using (var conn = new SqlConnection(@"Data Source=triton;Initial Catalog=INSURANCEW;Persist Security Info=True;User ID=sa;Password=ssa$20"))
 	{

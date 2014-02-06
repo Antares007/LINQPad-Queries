@@ -83,7 +83,7 @@ void Main()
 {
 //GetFileList2("localhost","anonymous",null).Dump();
 //return;
-Restore(@"J:\ShareForBakRestore\pens_dazgveva_20131225","forDeldazgveva20140101");
+Restore(@"J:\ShareForBakRestore\pens_dazgveva20140201.bak","forDeldazgveva20140201");
 
 //GetFileList("81.95.168.42","moh","(Jan-Dacva)").Dump();
 return ;

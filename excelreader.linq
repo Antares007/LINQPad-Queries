@@ -340,23 +340,70 @@ void RealizaciebisKorektireba()
 
 void Main()
 {
+
+
+ExcelisFailebi()
+	.GroupBy (x => x.GetType())
+	.Select (g => new {g.Key, Raodenoba=g.Count ()})
+	.Dump()
+	;
+return;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+return;
 	Func<string,Func<object>, DumpContainer>  expand = (label, lazy) => {
 			var cont = new LINQPad.DumpContainer();
 			cont.Content = new LINQPad.Hyperlinq(()=>{cont.Content=lazy();},label);
 			return cont;
 		};
 		
+		
+		
+		
+		
+		
+		
+		
 	var excelisFailebi = ExcelisFailebi().ToList();
 	var mr = DaamzadeMomeRefi();
-	
-	
 	
 	var docs = excelisFailebi.Where (x => x.GetType() != typeof(PakingListi) && x.GetType() != typeof(Gadaadgileba))
 									.Concat(Migebebi(excelisFailebi.OfType<PakingListi>()))
 									.Concat(FromCache<Cheki>("ch04"));
 								
 	var modzraobebi = Modzraobebi(docs);
-	
 	
 	var korektirebuliGadaadgilebebi = (
 		from m in modzraobebi
@@ -426,7 +473,7 @@ void Main()
 			}
 	)
 	.OrderBy (x => x.Key)
-	.Dump(6)
+//	.Dump(6)
 //	.DumpToExcel("zedmetadGakiduliKodebi")
 	;
 	
@@ -434,20 +481,82 @@ void Main()
 							.Concat(korektirebuliGadaadgilebebi)
 							.Concat(excelisFailebi.OfType<Gadaadgileba>().Select (d => { d.Dro = DateTime.Today.AddDays(1); return d; }))
 				).ToList();
-	var refDict = refebi.GroupBy (r => r.Ra).ToDictionary (r => r.Key,r=>r.Select (x => x.Dasakheleba).First ());
 
+	var refDict = refebi.GroupBy (r => r.Ra).ToDictionary (r => r.Key,r=>r.Select (x => x.Dasakheleba).First ());
+	
+	var sakartvelosPartiebi = new HashSet<string>(modzraobebi
+					.Where (m => m.Dokumenti.GetType() == typeof(Migeba) && 
+								((Migeba)m.Dokumenti).Chanacerebi.Any (c => c.Shenishvna.Contains("shps"))
+							)
+					.SelectMany (m => m.Modzraoba.Chanacerebi.SelectMany (c => c.PartiebiFiFo).Select (p => p.Id))
+					);
+	var estonuriPartiebi = new HashSet<string>(modzraobebi
+					.Where (m => m.Dokumenti.GetType() == typeof(Migeba))
+					.SelectMany (m => m.Chanacerebi())
+					.Where (c => c.Dasakheleba.ToUpper().StartsWith("MAT"))
+					.SelectMany (c => c.GamokofiliPartiebiFiFo.Select (x => x.Id))
+					);
+					
+
+	
 //	(
-//		from m in modzraobebi.Select (mo => mo.Modzraoba)
-//	 	from c in m.Chanacerebi
-//	 	from t in new []{
-//	 					new {Mdebareoba=c.Saidan, c.Ra, Raodenoba=c.Raodenoba*-1, Tankha=c.Tankha*-1},
-//						new {Mdebareoba=c.Sad, c.Ra, c.Raodenoba, c.Tankha}
-//					}
-//	 	group t by new {t.Mdebareoba,t.Ra} into g
-//	 	select new {g.Key.Ra, Dasakheleba = refDict.ContainsKey(g.Key.Ra) ? refDict[g.Key.Ra] : "n/a", g.Key.Mdebareoba, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)}
-//	)
-//	.DumpToExcel("nashti_" + DateTime.Today.ToString("yyyy.MM.dd"))
-//	;
+//		from m in modzraobebi
+//	 	from c in m.Chanacerebi()
+//		from p in c.GamokofiliPartiebiFiFo
+//		let momcodebeli = sakartvelosPartiebi.Contains(p.Id) 
+//									? "Georgia"
+//									: estonuriPartiebi.Contains(p.Id) 
+//											? "Estonia"
+//											: null
+//		where momcodebeli != null
+//		let koef = (decimal)(p.Raodenoba / c.Raodenoba)
+//		let Dasakheleba = refDict.ContainsKey(c.Ra) ? refDict[c.Ra] : "n/a"
+//		let Kvebrendi = string.Join(" ", Dasakheleba.Split(' ').Take(2))
+//		from t in new [] {
+//					new {mdebareoba = c.Saidan.Substring(0, c.Saidan.IndexOf('/')), Kvebrendi, momcodebeli, c.Ra, Dasakheleba, Tankha = c.GamokofiliTvitgirebuleba * koef * -1m },
+//					new {mdebareoba = c.Sad.Substring(0, c.Sad.IndexOf('/')), Kvebrendi, momcodebeli, c.Ra, Dasakheleba, Tankha = c.GamokofiliTvitgirebuleba * koef },
+//				}					
+//		select t
+//	).DumpToExcel("matelisreporti");
+//	return;
+	(
+		from m in modzraobebi
+	 	from c in m.Chanacerebi()
+		where c.Jami != 0m
+		where c.Sad.StartsWith("klien") || c.Saidan.StartsWith("klien")
+		from p in c.GamokofiliPartiebiFiFo
+		let momcodebeli = sakartvelosPartiebi.Contains(p.Id) 
+									? "Georgia"
+									: estonuriPartiebi.Contains(p.Id) 
+											? "Estonia"
+											: null
+		where momcodebeli != null
+		
+		let koef = (decimal)(p.Raodenoba / c.Raodenoba)
+		let Dasakheleba = refDict.ContainsKey(c.Ra) ? refDict[c.Ra] : "n/a"
+		let Kvebrendi = string.Join(" ", Dasakheleba.Split(' ').Take(2))
+		from t in new [] {
+					new {mdebareoba = c.Saidan.Substring(0, c.Saidan.IndexOf('/')), Kvebrendi, momcodebeli, c.Ra, Dasakheleba, Tankha = Math.Abs(c.Jami) * koef * -1m },
+					new {mdebareoba = c.Sad.Substring(0, c.Sad.IndexOf('/')), Kvebrendi, momcodebeli, c.Ra, Dasakheleba, Tankha = Math.Abs(c.Jami) * koef },
+				}					
+		select t
+	).DumpToExcel("matelisreportiRealizacia");
+	
+	return;
+	
+	(
+		from m in modzraobebi.Select (mo => mo.Modzraoba)
+	 	from c in m.Chanacerebi
+	 	from t in new []{
+	 					new {Mdebareoba=c.Saidan, c.Ra, Raodenoba=c.Raodenoba*-1, Tankha=c.Tankha*-1},
+						new {Mdebareoba=c.Sad, c.Ra, c.Raodenoba, c.Tankha}
+					}
+	 	group t by new {t.Mdebareoba,t.Ra} into g
+	 	select new {g.Key.Ra, Dasakheleba = refDict.ContainsKey(g.Key.Ra) ? refDict[g.Key.Ra] : "n/a", g.Key.Mdebareoba, Raodenoba=g.Sum (x => x.Raodenoba), Tankha=g.Sum (x => x.Tankha)}
+	)
+	//.DumpToExcel("nashti_" + DateTime.Today.ToString("yyyy.MM.dd"))
+	.Dump()
+	;
 //	(
 //		from m in modzraobebi.Select (mo => mo.Modzraoba)
 //	 	from c in m.Chanacerebi
