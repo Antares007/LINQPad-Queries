@@ -1,42 +1,35 @@
 <Query Kind="Program">
   <Connection>
-    <ID>ced05258-b3f5-4292-8b8d-577da55d0081</ID>
-    <Server>Triton</Server>
+    <ID>f15ad4e8-43bd-49fb-b254-765f91aab417</ID>
+    <Persist>true</Persist>
+    <Server>triton</Server>
     <SqlSecurity>true</SqlSecurity>
     <UserName>sa</UserName>
-    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA2LGCigg0bUqfvV+5fr69FwAAAAACAAAAAAAQZgAAAAEAACAAAABQjNqSoAChVc7pY40t5LwDSBgnqpqKpfGpztnrGU+Y2wAAAAAOgAAAAAIAACAAAACCDIBRLvjlNFjqIX5467Yafqrbi6HdDapIvcUgoSj9PxAAAABbOvffR/aHk+Wx3Yeu7FoiQAAAAC4eTdCoj/RY73eNWXEwWXOmecEVUn5J058U5ATdQJGxHG/+oeJKVPpg+FeqWtSGeM7adASTT3h8vPCAuNfk9Yk=</Password>
+    <Password>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAYk8RjK+1aEqszDkUec+REAAAAAACAAAAAAADZgAAwAAAABAAAAAvfPNfFC+ZH+tEAwQdXuPqAAAAAASAAACgAAAAEAAAAE11/F1JVJoxx29+vPSzqgsIAAAAE4g2sXs/a9kUAAAAUogP+V6rjv83AwLkSOANt3G7CDU=</Password>
+    <IncludeSystemObjects>true</IncludeSystemObjects>
     <Database>Pirvelckaroebi</Database>
     <ShowServer>true</ShowServer>
-    <Persist>true</Persist>
   </Connection>
-  <Reference>D:\Dev\Ganckhadebebi.Domain\Ganckhadebebi.Domain\bin\Debug\Ganckhadebebi.Domain.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.ConnectionInfo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Management.Sdk.Sfc.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.Smo.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SmoExtended.dll</Reference>
-  <Reference>&lt;ProgramFilesX64&gt;\Microsoft SQL Server\110\SDK\Assemblies\Microsoft.SqlServer.SqlEnum.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\WPF\PresentationFramework.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\PresentationCore.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Xaml.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\WindowsBase.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\UIAutomationProvider.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\System.Deployment.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\PresentationUI.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\System.Printing.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\ReachFramework.dll</Reference>
-  <Reference>&lt;RuntimeDirectory&gt;\wpf\UIAutomationTypes.dll</Reference>
   <Reference>&lt;RuntimeDirectory&gt;\Accessibility.dll</Reference>
+  <Reference Relative="Lib\Ganckhadebebi.Domain.dll">&lt;MyDocuments&gt;\LINQPad Queries\Lib\Ganckhadebebi.Domain.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\PresentationCore.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\WPF\PresentationFramework.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\PresentationUI.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\ReachFramework.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Deployment.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\System.Printing.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\System.Xaml.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\UIAutomationProvider.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\UIAutomationTypes.dll</Reference>
+  <Reference>&lt;RuntimeDirectory&gt;\wpf\WindowsBase.dll</Reference>
   <NuGetReference>Dapper</NuGetReference>
   <Namespace>Dapper</Namespace>
-  <Namespace>Microsoft.SqlServer.Management.Common</Namespace>
-  <Namespace>Microsoft.SqlServer.Management.Dmf</Namespace>
-  <Namespace>Microsoft.SqlServer.Management.Smo</Namespace>
-  <Namespace>System.Collections.Concurrent</Namespace>
-  <Namespace>System.Data.Common</Namespace>
   <Namespace>Ganckhadebebi.Domain</Namespace>
-  <Namespace>System.Windows.Controls</Namespace>
-  <Namespace>System.Windows</Namespace>
+  <Namespace>System.Collections.Concurrent</Namespace>
   <Namespace>System.Collections.ObjectModel</Namespace>
+  <Namespace>System.Data.Common</Namespace>
+  <Namespace>System.Windows</Namespace>
+  <Namespace>System.Windows.Controls</Namespace>
   <Namespace>System.Windows.Data</Namespace>
   <Namespace>System.Windows.Markup</Namespace>
 </Query>
@@ -160,7 +153,7 @@ IEnumerable<string> GetFieldsNames(IDbConnection con, string table_Name)
 {
     var nameParts=table_Name.Split('.').Select (x => x.Replace("[","").Replace("]","")).ToArray();
     if(nameParts.Length!=3)
-        throw new InvalidArgumentException("table_Name");
+        throw new ArgumentException("table_Name");
     return con.Query<string>("select COLUMN_NAME from "+nameParts[0]+".INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='"+nameParts[2]+"'");
 }
 Func<string, UnnomCkhrili> getCkhrilebisSacavi(IDbConnection con)
@@ -355,63 +348,63 @@ void RunInTransaction(Action<Tuple<SqlConnection,  SqlTransaction>> action)
 		}
 }
 
-public static class Ex
-{
-	public static IEnumerable<Database> Databases(this Server src) 
-	{
-		return src.Databases.Cast<Database>();
-	}	
-
-	public static IEnumerable<Table> Tables(this Database src) 
-	{
-		return src.Tables.Cast<Table>();
-	}	
-
-	public static IEnumerable<Column> Columns(this Table src) 
-	{
-		return src.Columns.Cast<Column>();
-	}	
-
-	public static IEnumerable<Index> Indexes(this Table src) 
-	{
-		return src.Indexes.Cast<Index>();
-	}	
-
-	public static IEnumerable<IndexedColumn> IndexedColumns(this Index src) 
-	{
-		return src.IndexedColumns.Cast<IndexedColumn>();
-	}
-
-	public static Table AddColumun(this Table tb, params Action<Column>[] colBulders) 
-	{
-		foreach(var colB in colBulders)
-		{
-			var col=new Column(){Parent=tb};
-			colB (col);
-			tb.Columns.Add(col);
-		}
-		return tb;
-	}
-	
-	public static void CreateIndexOn(this Table tb, params string[] columuns) {
-		Index idx;
-		idx = new Index(tb, "IX_"+tb.Name+"_"+string.Join("_", columuns));
-
-		foreach(var ic  in columuns.Select (c => new IndexedColumn(idx, c, false))){
-			idx.IndexedColumns.Add(ic);
-		}
-		idx.IsClustered = false;
-		idx.Create();
-	}
-	
-	private static readonly Lazy<Server> lazy = new Lazy<Server>(() => {
-			var conn = new ServerConnection("triton", "sa", "ssa$20");
-    		var srv = new Server(conn);
-			return srv;
-			});
-    
-    public static Server Triton { get { return lazy.Value; } }
-}
+//public static class Ex
+//{
+//	public static IEnumerable<Database> Databases(this Server src) 
+//	{
+//		return src.Databases.Cast<Database>();
+//	}	
+//
+//	public static IEnumerable<Table> Tables(this Database src) 
+//	{
+//		return src.Tables.Cast<Table>();
+//	}	
+//
+//	public static IEnumerable<Column> Columns(this Table src) 
+//	{
+//		return src.Columns.Cast<Column>();
+//	}	
+//
+//	public static IEnumerable<Index> Indexes(this Table src) 
+//	{
+//		return src.Indexes.Cast<Index>();
+//	}	
+//
+//	public static IEnumerable<IndexedColumn> IndexedColumns(this Index src) 
+//	{
+//		return src.IndexedColumns.Cast<IndexedColumn>();
+//	}
+//
+//	public static Table AddColumun(this Table tb, params Action<Column>[] colBulders) 
+//	{
+//		foreach(var colB in colBulders)
+//		{
+//			var col=new Column(){Parent=tb};
+//			colB (col);
+//			tb.Columns.Add(col);
+//		}
+//		return tb;
+//	}
+//	
+//	public static void CreateIndexOn(this Table tb, params string[] columuns) {
+//		Index idx;
+//		idx = new Index(tb, "IX_"+tb.Name+"_"+string.Join("_", columuns));
+//
+//		foreach(var ic  in columuns.Select (c => new IndexedColumn(idx, c, false))){
+//			idx.IndexedColumns.Add(ic);
+//		}
+//		idx.IsClustered = false;
+//		idx.Create();
+//	}
+//	
+//	private static readonly Lazy<Server> lazy = new Lazy<Server>(() => {
+//			var conn = new ServerConnection("triton", "sa", "ssa$20");
+//    		var srv = new Server(conn);
+//			return srv;
+//			});
+//    
+//    public static Server Triton { get { return lazy.Value; } }
+//}
 
 
 public static class Ex2
